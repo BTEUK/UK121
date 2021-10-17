@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.bteuk.uk121.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+  ],
+  "client": [
+    "UK121Mixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
