@@ -1,6 +1,7 @@
 package net.bteuk.uk121;
 
 import net.bteuk.uk121.item.ModItems;
+import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.world.GeneratorType;
 import net.minecraft.util.registry.Registry;
@@ -20,9 +21,9 @@ public class UK121 implements ModInitializer {
 
 	public static final String MOD_ID = "uk121";
 
-	private static final GeneratorType EARTH = new GeneratorType("earth") {
+	private static final GeneratorType VOID = new GeneratorType("void") {
 		protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
-				Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry, long seed) {
+												   Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry, long seed) {
 			FlatChunkGeneratorConfig config = new FlatChunkGeneratorConfig(
 					new StructuresConfig(Optional.empty(), Collections.emptyMap()), biomeRegistry);
 			config.updateLayerBlocks();
@@ -37,6 +38,8 @@ public class UK121 implements ModInitializer {
 		// Proceed with mild caution.
 
 		ModItems.registerModItems();
+
+		GeneratorTypeAccessor.getValues().add(VOID);
 
 		LOGGER.info("Hello Fabric world!");
 	}

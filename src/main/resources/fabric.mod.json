@@ -35,5 +35,6 @@
   },
   "suggests": {
     "another-mod": "*"
-  }
+  },
+  "accessWidener": "uk121.accesswidener"
 }

@@ -85,3 +85,7 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+loom {
+	accessWidenerPath = file("src/main/resources/uk121.accesswidener")
+}
