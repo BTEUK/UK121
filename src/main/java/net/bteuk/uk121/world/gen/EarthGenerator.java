@@ -18,6 +18,7 @@ public class EarthGenerator extends ChunkGenerator {
 
     public EarthGenerator(BiomeSource biomeSource, StructuresConfig structuresConfig) {
         super(biomeSource, structuresConfig);
+        System.out.println("LOL");
     }
 
     @Override
@@ -32,12 +33,14 @@ public class EarthGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurface(ChunkRegion region, Chunk chunk) {
-
     }
 
     @Override
-    public CompletableFuture<Chunk> populateNoise(Executor executor, StructureAccessor accessor, Chunk chunk) {
-        return null;
+    public CompletableFuture<Chunk> populateNoise(Executor executor, StructureAccessor accessor, Chunk chunk)
+    {
+        CompletableFuture<Chunk> workingChunk= new CompletableFuture<Chunk>();
+
+        return workingChunk;
     }
 
     @Override
