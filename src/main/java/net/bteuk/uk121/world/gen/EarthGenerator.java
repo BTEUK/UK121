@@ -10,10 +10,10 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.StructureAccessor;
-import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.StructuresConfig;
-import net.minecraft.world.gen.chunk.VerticalBlockSample;
+import net.minecraft.world.gen.chunk.*;
 
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -32,7 +32,7 @@ public class EarthGenerator extends ChunkGenerator {
     );
 
     public EarthGenerator(BiomeSource biomeSource, boolean customBool) {
-        super(biomeSource, new StructuresConfig(false));
+        super(biomeSource, new StructuresConfig(Optional.of(new StrongholdConfig(0,0,0)), new HashMap<>()));
         this.customBool = customBool;
     }
 
@@ -54,10 +54,6 @@ public class EarthGenerator extends ChunkGenerator {
     @Override
     public CompletableFuture<Chunk> populateNoise(Executor executor, StructureAccessor accessor, Chunk chunk) {
 
-        UK121.LOGGER.info(executor.toString());
-        UK121.LOGGER.info(accessor.toString());
-        UK121.LOGGER.info(chunk.getPos().x);
-        UK121.LOGGER.info("populateNoise!");
         CompletableFuture<Chunk> cfc = new CompletableFuture<>();
         cfc.complete(chunk);
         return cfc;
