@@ -29,33 +29,40 @@ import java.util.concurrent.Executor;
 import static net.minecraft.world.biome.BuiltinBiomes.PLAINS;
 
 public class UK121 implements ModInitializer {
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
-	public static final Logger LOGGER = LogManager.getLogger("uk121");
+    // This logger is used to write text to the console and the log file.
+    // It is considered best practice to use your mod id as the logger's name.
+    // That way, it's clear which mod wrote info, warnings, and errors.
+    public static final Logger LOGGER = LogManager.getLogger("uk121");
 
-	public static final String MOD_ID = "uk121";
+    public static final String MOD_ID = "uk121";
 
-	private static final GeneratorType EARTH = new GeneratorType("earth") {
-		protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
-												   Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
-												   long seed) {
-			return new EarthGenerator(new FixedBiomeSource(PLAINS), new StructuresConfig(false));
-		}
-	};
+    private static final GeneratorType VOID = new GeneratorType("void") {
+        protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
+                                                   Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry, long seed) {
+            FlatChunkGeneratorConfig config = new FlatChunkGeneratorConfig(
+                    new StructuresConfig(Optional.empty(), Collections.emptyMap()), biomeRegistry);
+            config.updateLayerBlocks();
+            return new FlatChunkGenerator(config);
+        }
+    };
 
-	StructuresConfig structuresConfig = new StructuresConfig(false);
+    private static final GeneratorType EARTH = new GeneratorType("earth") {
+        protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
+                                                   Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
+                                                   long seed) {
+            return new EarthGenerator(new FixedBiomeSource(PLAINS), new StructuresConfig(false));
+        }
+    };
 
-	@Override
-	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+    @Override
+    public void onInitialize() {
+        // This code runs as soon as Minecraft is in a mod-load-ready state.
+        // However, some things (like resources) may still be uninitialized.
+        // Proceed with mild caution.
 
-		ModItems.registerModItems();
+        GeneratorTypeAccessor.getValues().add(EARTH);
+        GeneratorTypeAccessor.getValues().add(VOID);
 
-		GeneratorTypeAccessor.getValues().add(EARTH);
-
-		LOGGER.info("Hello Fabric world!");
-	}
+        LOGGER.info("Hello Fabric world!");
+    }
 }
