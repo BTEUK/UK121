@@ -4,6 +4,7 @@
   "package": "net.bteuk.uk121.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "GeneratorTypeAccessor"
   ],
   "client": [
     "UK121Mixin"
