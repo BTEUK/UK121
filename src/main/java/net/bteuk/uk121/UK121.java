@@ -50,7 +50,7 @@ public class UK121 implements ModInitializer {
         protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
                                                    long seed) {
-            return new EarthGenerator(new FixedBiomeSource(PLAINS), new StructuresConfig(false));
+            return new EarthGenerator(new FixedBiomeSource(PLAINS), true);
         }
     };
 

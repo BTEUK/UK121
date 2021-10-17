@@ -1,6 +1,7 @@
 package net.bteuk.uk121.world.gen;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.UK121;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.ChunkRegion;
@@ -18,9 +19,21 @@ import java.util.concurrent.Executor;
 
 public class EarthGenerator extends ChunkGenerator {
 
-    public EarthGenerator(BiomeSource biomeSource, StructuresConfig structuresConfig) {
-        super(biomeSource, structuresConfig);
-        UK121.LOGGER.info("EarthGenerator!");
+    protected final boolean customBool;
+
+    public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) ->
+            instance.group(
+                            BiomeSource.CODEC.fieldOf("biome_source")
+                                    .forGetter((generator) -> generator.biomeSource),
+                            Codec.BOOL.fieldOf("custom_bool")
+                                    .forGetter((generator) -> generator.customBool)
+                    )
+                    .apply(instance, instance.stable(EarthGenerator::new))
+    );
+
+    public EarthGenerator(BiomeSource biomeSource, boolean customBool) {
+        super(biomeSource, new StructuresConfig(false));
+        this.customBool = customBool;
     }
 
     @Override
@@ -59,6 +72,6 @@ public class EarthGenerator extends ChunkGenerator {
     @Override
     public VerticalBlockSample getColumnSample(int x, int z, HeightLimitView world) {
         UK121.LOGGER.info("getColumnSample!");
-        return new VerticalBlockSample(1, new BlockState[0]);
+        return new VerticalBlockSample(0, new BlockState[0]);
     }
 }
