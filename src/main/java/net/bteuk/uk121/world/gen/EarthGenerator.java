@@ -21,6 +21,11 @@ public class EarthGenerator extends ChunkGenerator {
 
     protected final boolean customBool;
 
+    //Structure config values
+    private static final int iDistance = 0;
+    private static final int iSpread = 0;
+    private static final int iCount = 0;
+
     public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) ->
             instance.group(
                             BiomeSource.CODEC.fieldOf("biome_source")
@@ -32,8 +37,14 @@ public class EarthGenerator extends ChunkGenerator {
     );
 
     public EarthGenerator(BiomeSource biomeSource, boolean customBool) {
-        super(biomeSource, new StructuresConfig(Optional.of(new StrongholdConfig(0,0,0)), new HashMap<>()));
+        super(biomeSource, new StructuresConfig(Optional.of(ConfigSetup()), new HashMap<>()));
         this.customBool = customBool;
+    }
+
+    private static StrongholdConfig ConfigSetup()
+    {
+        StrongholdConfig ourStructureConfig = new StrongholdConfig(iDistance, iSpread, iCount);
+        return ourStructureConfig;
     }
 
     @Override
