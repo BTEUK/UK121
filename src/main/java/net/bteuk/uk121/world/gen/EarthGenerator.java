@@ -38,15 +38,6 @@ public class EarthGenerator extends ChunkGenerator {
     private static final int iSpread = 0;
     private static final int iCount = 0;
 
-    public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) ->
-            instance.group(
-                            BiomeSource.CODEC.fieldOf("biome_source")
-                                    .forGetter((generator) -> generator.biomeSource),
-                            Codec.BOOL.fieldOf("custom_bool")
-                                    .forGetter((generator) -> generator.customBool)
-                    )
-                    .apply(instance, instance.stable(EarthGenerator::new))
-    );
     public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) -> {
         return instance.group(BiomeSource.CODEC.fieldOf("biome_source").forGetter((EarthGenerator) -> {
             return EarthGenerator.biomeSource;
@@ -54,7 +45,7 @@ public class EarthGenerator extends ChunkGenerator {
     });
 
     public EarthGenerator(BiomeSource biomeSource) {
-        super(biomeSource, new StructuresConfig(Optional.of(new StrongholdConfig(0,0,0)), new HashMap<>()));
+        super(biomeSource, new StructuresConfig(Optional.of(ConfigSetup()), new HashMap<>()));
         random = new ChunkRandom(0);
         defaultBlock = Blocks.STONE.getDefaultState();
         defaultFluid = Blocks.WATER.getDefaultState();
