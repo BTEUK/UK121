@@ -3,20 +3,23 @@ package net.bteuk.uk121;
 import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.bteuk.uk121.world.gen.EarthGenerator;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.GeneratorType;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.biome.DefaultBiomeCreator;
+import net.minecraft.world.biome.layer.BiomeLayers;
+import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.gen.chunk.*;
-import net.minecraft.world.gen.feature.StructureFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.system.CallbackI;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Optional;
-
-import static net.minecraft.world.biome.BuiltinBiomes.PLAINS;
+import java.util.*;
 
 public class UK121 implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -41,7 +44,9 @@ public class UK121 implements ModInitializer {
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
                                                    long seed) {
 
-            return new EarthGenerator(new FixedBiomeSource(PLAINS), true);
+            Biome biome = DefaultBiomeCreator.createPlains(false);
+
+            return new EarthGenerator(new FixedBiomeSource(biome));
         }
     };
 
@@ -51,11 +56,15 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-
-
         GeneratorTypeAccessor.getValues().add(EARTH);
-        GeneratorTypeAccessor.getValues().add(VOID);
+        Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
+
+        //GeneratorTypeAccessor.getValues().add(VOID);
 
         LOGGER.info("Hello Fabric world!");
+    }
+
+    public Identifier id(String... path){
+        return new Identifier(MOD_ID, String.join(".", path));
     }
 }
