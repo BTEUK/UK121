@@ -49,16 +49,16 @@ public class EarthGenerator extends ChunkGenerator {
     });
 
     public EarthGenerator(BiomeSource biomeSource) {
-        super(biomeSource, new StructuresConfig(Optional.of(ConfigSetup()), new HashMap<>()));
+        super(biomeSource, new StructuresConfig(Optional.of(StrongholdConfigSetup()), new HashMap<>()));
         random = new ChunkRandom(0);
         defaultBlock = Blocks.STONE.getDefaultState();
         defaultFluid = Blocks.WATER.getDefaultState();
     }
 
-    private static StrongholdConfig ConfigSetup()
+    private static StrongholdConfig StrongholdConfigSetup()
     {
-        StrongholdConfig ourStructureConfig = new StrongholdConfig(iDistance, iSpread, iCount);
-        return ourStructureConfig;
+        StrongholdConfig ourStrongholdConfig = new StrongholdConfig(iDistance, iSpread, iCount);
+        return ourStrongholdConfig;
     }
 
     @Override

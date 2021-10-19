@@ -64,7 +64,7 @@ public class UK121 implements ModInitializer {
 
         //GeneratorTypeAccessor.getValues().add(VOID);
 
-        LOGGER.info("Hello Fabric world!");
+        LOGGER.info("UK121 Initialised!");
     }
 
     public Identifier id(String... path){
