@@ -3,6 +3,7 @@ package net.bteuk.uk121.world.gen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.UK121;
+import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -20,16 +21,19 @@ import net.minecraft.world.gen.DefaultBlockSource;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
 import net.minecraft.world.gen.surfacebuilder.ConfiguredSurfaceBuilder;
+import net.minecraft.world.gen.surfacebuilder.SurfaceBuilder;
+import net.minecraft.world.gen.surfacebuilder.TernarySurfaceConfig;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class EarthGenerator extends ChunkGenerator {
 
-    protected final ChunkRandom random;
+    protected final Random random;
     protected final BlockState defaultBlock;
     protected final BlockState defaultFluid;
 
@@ -69,7 +73,7 @@ public class EarthGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurface(ChunkRegion region, Chunk chunk) {
-/*
+
         ChunkPos chunkPos = chunk.getPos();
         int cx = chunkPos.x;
         int cz = chunkPos.z;
@@ -80,14 +84,17 @@ public class EarthGenerator extends ChunkGenerator {
         int x;
         int z;
 
-        for (int i = 0; i < 16; i++){
-            for (int j = 0; j < 16; j++){
+        TernarySurfaceConfig config = new TernarySurfaceConfig(defaultBlock, defaultBlock, defaultBlock);
+        EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(TernarySurfaceConfig.CODEC);
+
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
                 x = x0 + i;
                 z = z0 + j;
 
+                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 0, z), x, z, 150, 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
             }
-        }*/
-        UK121.LOGGER.info("buildSurface!");
+        }
     }
 
     @Override

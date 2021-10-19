@@ -2,24 +2,25 @@ package net.bteuk.uk121;
 
 import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.bteuk.uk121.world.gen.EarthGenerator;
+import net.bteuk.uk121.world.gen.biome.EarthBiomeSource;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.biome.v1.OverworldBiomes;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.client.world.GeneratorType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.BuiltinRegistries;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.DefaultBiomeCreator;
-import net.minecraft.world.biome.layer.BiomeLayers;
-import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.gen.chunk.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.system.CallbackI;
 
 import java.util.*;
+
+import static net.minecraft.world.biome.BiomeKeys.FOREST;
+import static net.minecraft.world.biome.BuiltinBiomes.PLAINS;
 
 public class UK121 implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -44,9 +45,10 @@ public class UK121 implements ModInitializer {
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
                                                    long seed) {
 
-            Biome biome = DefaultBiomeCreator.createPlains(false);
+            DynamicRegistryManager registry = DynamicRegistryManager.create();
+            Registry<Biome> biomes = registry.get(Registry.BIOME_KEY);
 
-            return new EarthGenerator(new FixedBiomeSource(biome));
+            return new EarthGenerator(new EarthBiomeSource(biomes, 0, 0));
         }
     };
 
@@ -57,6 +59,7 @@ public class UK121 implements ModInitializer {
         // Proceed with mild caution.
 
         GeneratorTypeAccessor.getValues().add(EARTH);
+        Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_biome_source"), EarthBiomeSource.CODEC);
         Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
 
         //GeneratorTypeAccessor.getValues().add(VOID);
