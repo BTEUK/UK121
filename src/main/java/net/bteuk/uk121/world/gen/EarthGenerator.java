@@ -69,25 +69,38 @@ public class EarthGenerator extends ChunkGenerator {
     @Override
     public void buildSurface(ChunkRegion region, Chunk chunk) {
 
+        //Get the location of the chunk
         ChunkPos chunkPos = chunk.getPos();
+        //Get the chunk x and z
         int cx = chunkPos.x;
         int cz = chunkPos.z;
 
+        //Get the corner of the chunk in x and z.
         int x0 = chunkPos.getStartX();
         int z0 = chunkPos.getStartZ();
 
         int x;
         int z;
 
+        //Create an array from 0 to 255
+        int[] elev = new int[16*16];
+        for (int p = 0; p < 16*16; p++){
+            elev[p] = p;
+        }
+
+        //Basic surface config, to be edited later.
         TernarySurfaceConfig config = new TernarySurfaceConfig(defaultBlock, defaultBlock, defaultBlock);
+        //Create surfaceBuilder, which is where the blocks are actually generated.
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(TernarySurfaceConfig.CODEC);
 
+        //Iterate through each x,z of Chunk
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
                 x = x0 + i;
                 z = z0 + j;
 
-                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, 2032, 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
+                //Generate a block at x,z with height elev[i+j*16] for testing purposes.
+                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, elev[i+j*16], 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
             }
         }
     }

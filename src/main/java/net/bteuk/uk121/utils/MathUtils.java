@@ -150,7 +150,7 @@ public class MathUtils {
             res = val;
         } else if (shift > 0) {
             res = val << shift;
-            checkState(res >> shift == val, "numeric overflow: val: %d, shift: %d", val, shift);
+            //checkState(res >> shift == val, "numeric overflow: val: %d, shift: %d", val, shift);
         } else {
             res = val >> -shift;
         }

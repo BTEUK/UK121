@@ -9,7 +9,7 @@ import net.bteuk.uk121.utils.MathUtils;
 import java.io.InputStream;
 import java.sql.Ref;
 
-@JsonDeserialize
+/*@JsonDeserialize
 public class ConformalDynmaxionProjection extends DymaxionProjection {
     protected static final double VECTOR_SCALE_FACTOR = 1.0d / 1.1473979730192934d;
     protected static final int SIDE_LENGTH = 256;
@@ -187,4 +187,4 @@ public class ConformalDynmaxionProjection extends DymaxionProjection {
             return new double[]{ xest, yest };
         }
     }
-}
+}*/

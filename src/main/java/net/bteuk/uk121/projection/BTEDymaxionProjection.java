@@ -3,7 +3,7 @@ package net.bteuk.uk121.projection;
 //Copied from terraplusplus
 
 import net.bteuk.uk121.utils.MathUtils;
-
+/*
 @JsonDeserialize
 public class BTEDymaxionProjection extends ConformalDynmaxionProjection {
 
@@ -123,4 +123,4 @@ public class BTEDymaxionProjection extends ConformalDynmaxionProjection {
     public String toString() {
         return "BuildTheEarth Conformal Dymaxion";
     }
-}
+}*/

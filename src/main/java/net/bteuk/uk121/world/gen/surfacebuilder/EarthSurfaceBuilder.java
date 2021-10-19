@@ -18,6 +18,8 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
 
     @Override
     public void generate(Random random, Chunk chunk, Biome biome, int x, int z, int height, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int i, long l, TernarySurfaceConfig surfaceConfig) {
-        chunk.setBlockState(new BlockPos(x, 1, z), defaultBlock, false);
+
+        //Generates defaultBlock at the specified location x,height,z
+        chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
     }
 }

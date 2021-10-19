@@ -4,7 +4,7 @@ package net.bteuk.uk121.projection;
 
 import net.bteuk.uk121.utils.MathUtils;
 
-@JsonDeserialize
+//@JsonDeserialize
 public class DymaxionProjection implements GeographicProjection {
 
     protected static final double ARC = 2 * Math.asin(Math.sqrt(5 - Math.sqrt(5)) / Math.sqrt(10));

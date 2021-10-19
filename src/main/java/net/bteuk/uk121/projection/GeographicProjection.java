@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-@JsonDeserialize(using = GeographicProjection.Deserializer.class)
-@JsonSerialize(using = GeographicProjection.Serializer.class)
+//@JsonDeserialize(using = GeographicProjection.Deserializer.class)
+//@JsonSerialize(using = GeographicProjection.Serializer.class)
 public interface GeographicProjection {
     @SneakyThrows(IOException.class)
-    static GeographicProjection parse(@NonNull String config) {
+    /*static GeographicProjection parse(@NonNull String config) {
         return TerraConstants.JSON_MAPPER.readValue(config, GeographicProjection.class);
-    }
+    }*/
 
     /**
      * Converts map coordinates to geographic coordinates
@@ -221,7 +221,7 @@ public interface GeographicProjection {
     default Map<String, Object> properties() {
         return Collections.emptyMap();
     }
-
+/*
     class Deserializer extends TypedDeserializer<GeographicProjection> {
         @Override
         protected Map<String, Class<? extends GeographicProjection>> registry() {
@@ -234,5 +234,5 @@ public interface GeographicProjection {
         protected Map<Class<? extends GeographicProjection>, String> registry() {
             return GlobalParseRegistries.PROJECTIONS.inverse();
         }
-    }
+    }*/
 }
