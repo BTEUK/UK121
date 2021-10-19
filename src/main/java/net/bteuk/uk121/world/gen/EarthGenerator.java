@@ -3,6 +3,7 @@ package net.bteuk.uk121.world.gen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.UK121;
+import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -93,6 +94,7 @@ public class EarthGenerator extends ChunkGenerator {
         //Create surfaceBuilder, which is where the blocks are actually generated.
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(TernarySurfaceConfig.CODEC);
 
+        /*
         //Iterate through each x,z of Chunk
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
@@ -101,6 +103,30 @@ public class EarthGenerator extends ChunkGenerator {
 
                 //Generate a block at x,z with height elev[i+j*16] for testing purposes.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, elev[i+j*16], 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
+            }
+        }
+        */
+
+        //Used to store the height value fetched from the API call
+        int iHeight;
+
+        //For each x of chunk
+        for (int i = 0; i < 16; i++)
+        {
+            //Updates the actual x coordinate
+            x = x0 + i;
+
+            //For each z of each x
+            for (int j = 0; j < 16; j++)
+            {
+                //Updates the actual z coordinate
+                z = z0 + j;
+
+                //Gets the height of a particular block
+                iHeight = BlockAPICall.getHeightforXZ(x, z);
+
+                //Generate a block at x,z with the correct height fetched from the api call.
+                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
             }
         }
     }
