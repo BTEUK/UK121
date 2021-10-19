@@ -4,24 +4,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkRandom;
-import net.minecraft.world.gen.DefaultBlockSource;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.*;
-import net.minecraft.world.gen.surfacebuilder.ConfiguredSurfaceBuilder;
-import net.minecraft.world.gen.surfacebuilder.SurfaceBuilder;
 import net.minecraft.world.gen.surfacebuilder.TernarySurfaceConfig;
 
 import java.util.HashMap;
@@ -29,7 +22,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 public class EarthGenerator extends ChunkGenerator {
 
@@ -50,8 +42,11 @@ public class EarthGenerator extends ChunkGenerator {
 
     public EarthGenerator(BiomeSource biomeSource) {
         super(biomeSource, new StructuresConfig(Optional.of(StrongholdConfigSetup()), new HashMap<>()));
+        //Random based on world seed. Not really applicable to this world type but added nontheless.
         random = new ChunkRandom(0);
+        //Default block set to stone.
         defaultBlock = Blocks.STONE.getDefaultState();
+        //Default fluid set to water.
         defaultFluid = Blocks.WATER.getDefaultState();
     }
 
@@ -92,7 +87,7 @@ public class EarthGenerator extends ChunkGenerator {
                 x = x0 + i;
                 z = z0 + j;
 
-                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 0, z), x, z, 150, 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
+                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, 2032, 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
             }
         }
     }

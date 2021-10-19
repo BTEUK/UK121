@@ -1,5 +1,7 @@
 package net.bteuk.uk121;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.bteuk.uk121.world.gen.EarthGenerator;
 import net.bteuk.uk121.world.gen.biome.EarthBiomeSource;
@@ -70,4 +72,16 @@ public class UK121 implements ModInitializer {
     public Identifier id(String... path){
         return new Identifier(MOD_ID, String.join(".", path));
     }
+
+    /**
+     * Earth's circumference around the equator, in meters.
+     */
+    public static final double EARTH_CIRCUMFERENCE = 40075017;
+
+    /**
+     * Earth's circumference around the poles, in meters.
+     */
+    public static final double EARTH_POLAR_CIRCUMFERENCE = 40008000;
+
+    public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
 }
