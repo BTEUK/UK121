@@ -32,7 +32,9 @@ public class UK121 implements ModInitializer {
 
     public static final String MOD_ID = "uk121";
 
-    private static final GeneratorType VOID = new GeneratorType("void") {
+    //Adds the "void" generator type - used for testing
+    private static final GeneratorType VOID = new GeneratorType("void")
+    {
         protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry, long seed) {
             FlatChunkGeneratorConfig config = new FlatChunkGeneratorConfig(
@@ -42,15 +44,24 @@ public class UK121 implements ModInitializer {
         }
     };
 
+    //Adds the "Earth" generator type, used for generating the earth
     private static final GeneratorType EARTH = new GeneratorType("earth") {
+        //Returns a new EarthGenerator class
         protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
                                                    long seed) {
 
+            //Creates the registry manager
             DynamicRegistryManager registry = DynamicRegistryManager.create();
+
+            //Gets the biome registry from the registry manager
             Registry<Biome> biomes = registry.get(Registry.BIOME_KEY);
 
-            return new EarthGenerator(new EarthBiomeSource(biomes, 0, 0));
+            //Initiates a new biome source object. Fields: biomes, biome size, seed
+            EarthBiomeSource earthBiomeSource = new EarthBiomeSource(biomes, 0, 0);
+
+            //Returns a new EarthGenerator object, parsing the biome source in
+            return new EarthGenerator(earthBiomeSource);
         }
     };
 
@@ -60,6 +71,7 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
+        //Adds the generator type to the accessor
         GeneratorTypeAccessor.getValues().add(EARTH);
         Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_biome_source"), EarthBiomeSource.CODEC);
         Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
