@@ -1,28 +1,23 @@
 package net.bteuk.uk121;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.bteuk.uk121.world.gen.EarthGenerator;
 import net.bteuk.uk121.world.gen.biome.EarthBiomeSource;
+import net.bteuk.uk121.world.gen.biome.EarthPopulationSource;
+import net.bteuk.uk121.world.gen.biome.EmptyBiome;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.biome.v1.OverworldBiomes;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.client.world.GeneratorType;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.gen.chunk.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-
-import static net.minecraft.world.biome.BiomeKeys.FOREST;
-import static net.minecraft.world.biome.BuiltinBiomes.PLAINS;
 
 public class UK121 implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -31,6 +26,17 @@ public class UK121 implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("uk121");
 
     public static final String MOD_ID = "uk121";
+
+    //Value of lowest generated block.
+    //Future update this will be configurable.
+    public static final int YMIN = -512;
+    //Sealevel of EarthGenerator
+    //Future update this will be configurable.
+    public static final int SEALEVEL = 0;
+
+    //Setup empty biome
+    public static final RegistryKey<Biome> EMPTY_KEY = RegistryKey.of(Registry.BIOME_KEY, new Identifier(MOD_ID, "empty"));
+    public static final Biome EMPTY = EmptyBiome.EMPTY;
 
     //Adds the "void" generator type - used for testing
     private static final GeneratorType VOID = new GeneratorType("void")
@@ -51,17 +57,13 @@ public class UK121 implements ModInitializer {
                                                    Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
                                                    long seed) {
 
-            //Creates the registry manager
-            DynamicRegistryManager registry = DynamicRegistryManager.create();
-
-            //Gets the biome registry from the registry manager
-            Registry<Biome> biomes = registry.get(Registry.BIOME_KEY);
-
             //Initiates a new biome source object. Fields: biomes, biome size, seed
-            EarthBiomeSource earthBiomeSource = new EarthBiomeSource(biomes, 0, 0);
+            EarthBiomeSource earthBiomeSource = new EarthBiomeSource(biomeRegistry, 0, 0);
+            //Initiates a new biome population object. Fields: biomes, biome size, seed
+            EarthPopulationSource earthPopulationSource = new EarthPopulationSource(biomeRegistry, 0, 0);
 
             //Returns a new EarthGenerator object, parsing the biome source in
-            return new EarthGenerator(earthBiomeSource);
+            return new EarthGenerator(earthPopulationSource, earthBiomeSource);
         }
     };
 
@@ -73,6 +75,10 @@ public class UK121 implements ModInitializer {
 
         //Adds the generator type to the accessor
         GeneratorTypeAccessor.getValues().add(EARTH);
+        //Register custom empty biome
+        Registry.register(BuiltinRegistries.BIOME, EMPTY_KEY.getValue(), EMPTY);
+        //Register Biome Source for biome and population
+        Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_population_source"), EarthPopulationSource.CODEC);
         Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_biome_source"), EarthBiomeSource.CODEC);
         Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
 
