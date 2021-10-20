@@ -34,6 +34,9 @@ public class UK121 implements ModInitializer {
     //Future update this will be configurable.
     public static final int SEALEVEL = 0;
 
+    //Title Screen image.
+    public static final Identifier TITLE_SCREEN = new Identifier("uk121:textures/gui/title/background/2.png");
+
     //Setup empty biome
     public static final RegistryKey<Biome> EMPTY_KEY = RegistryKey.of(Registry.BIOME_KEY, new Identifier(MOD_ID, "empty"));
     public static final Biome EMPTY = EmptyBiome.EMPTY;
