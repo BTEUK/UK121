@@ -27,8 +27,14 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
         //chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
 
         //Generated defaultBlock at the specified height and everything below that.
-        for (int h = UK121.YMIN; h <= height; h++){
-            chunk.setBlockState(new BlockPos(x, h, z), defaultBlock, false);
+        for (int h = UK121.YMIN; h <= height; h++)
+        {
+            if (h == height)
+            {
+                chunk.setBlockState(new BlockPos(x, h, z), surfaceConfig.getTopMaterial(), false);
+            } else {
+                chunk.setBlockState(new BlockPos(x, h, z), defaultBlock, false);
+            }
         }
     }
 }
