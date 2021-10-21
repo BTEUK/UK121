@@ -4,7 +4,8 @@
   "package": "net.bteuk.uk121.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "GeneratorTypeAccessor"
+    "GeneratorTypeAccessor",
+    "IncreaseWorldHeight"
   ],
   "client": [
     "UK121Mixin",
