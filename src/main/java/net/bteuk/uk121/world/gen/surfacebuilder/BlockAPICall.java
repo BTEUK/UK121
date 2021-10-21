@@ -10,20 +10,28 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class BlockAPICall {
+    public static ModifiedAirocean projections = new ModifiedAirocean();
+
     public static double dLongitude;
     public static double dLatitude;
     public static final int zoom = 15;
 
     public static int xTile, yTile;
+    public static double x, y;
 
     public static void main(String[] args)
     {
-        System.out.println("Height: " +getHeightforXZ(2811200,-5390656,0));
+        System.out.println("Height: " +getHeightforXZ(2810630,-5390651,0));
     }
 
 
     public static int getHeightforXZ(double X, double Z, int iHeight) {
+        x = X;
+        y = Z;
+
         convertMCCordsToLongLat(X, Z);
+
+
 
         //Calculates the tile
         getTile(dLatitude, dLongitude, zoom);
@@ -48,14 +56,18 @@ public class BlockAPICall {
         fileName = "C://Elevation/" +zoom +"/" +xTile +"/" +yTile +".png";
         File file = new File(fileName);
 
+        int[] pixel = getPixel();
+
         try {
             pngTile = ImageIO.read(file);
-               int[] rgb = pngTile.getRGB(0, 0, 16, 16, null, 0, 16);
+            int rgb = pngTile.getRGB(pixel[0], pixel[1]);
+            int a = (rgb>>24)&0xff;
+            int r = (rgb>>16)&0xff;
+            int g = (rgb>>8)&0xff;
+            int b = rgb&0xff;
 
+            iHeight = (r * 256 + g + b / 256) - 32768;
 
-            //   iHeight = (rgb[0] * 256 + rgb[1] + rgb[2] / 256) - 32768;
-
-               iHeight = rgb[0];
         } catch (Exception e) {
 
         }
@@ -78,10 +90,10 @@ public class BlockAPICall {
     }
 
     public static void convertMCCordsToLongLat(double iX, double iZ) {
-        ModifiedAirocean projections = new ModifiedAirocean();
         double[] longlat = projections.toGeo(iX, iZ);
         dLongitude = longlat[0];
         dLatitude = longlat[1];
+        System.out.println("Initial conversion: ");
         System.out.println("Long: "+longlat[0]);
         System.out.println("Lat: "+longlat[1]);
     }
@@ -108,6 +120,85 @@ public class BlockAPICall {
             ytile = ((1 << zoom) - 1);
         xTile = xtile;
         yTile = ytile;
+    }
+    public static double[] longLat(int x, int y, int zoom)
+    {
+        double[] longlat = new double[2];
+        longlat[0] = ( x/Math.pow(2,zoom))*360 - 180;
+        double lat_rad = Math.atan(Math.sinh(Math.PI * ( 1 - ( 2 * (y / Math.pow(2,zoom) ) ) )));
+        longlat[1] = lat_rad * (180.0 / Math.PI);
+
+        return longlat;
+    }
+
+    public static int[] getPixel()
+    {
+        int[] pixel = new int[2];
+
+        //Find the block represented by the top left pixel
+        System.out.println("NW corner:");
+        double[] blockNWCorner = projections.fromGeo(longLat(xTile, yTile, zoom)[0],longLat(xTile, yTile, zoom)[1]);
+        System.out.println("SE corner:");
+        double[] blockSECorner = projections.fromGeo(longLat(xTile+1, yTile+1, zoom)[0],longLat(xTile+1, yTile+1, zoom)[1]);
+
+        double c = blockSECorner[1] -  blockNWCorner[1];
+        double d = blockSECorner[0] - blockNWCorner[0];
+
+        System.out.println("C: "+c);
+        System.out.println("D: "+d);
+
+        double a = x - blockNWCorner[0];
+        double b = y - blockNWCorner[1];
+
+        System.out.println("A: "+a);
+        System.out.println("B: "+b);
+
+
+        double length = Math.sqrt(a*a + b*b);
+
+        double angleW = Math.acos(Math.abs((d*a + c*b)/(Math.sqrt(c*c + d*d)*length)));
+
+        System.out.println("Angle W: "+angleW);
+
+        double angleX = Math.PI/4 - angleW;
+
+        System.out.println("Angle X: "+angleX);
+
+        System.out.println("Length: "+length);
+
+        double e = length*Math.cos(angleX);
+        double f = length*Math.sin(angleX);
+
+        if ((d*a + c*b)/(Math.sqrt(c*c + d*d)*length) < 0)
+        {
+            double sub = e;
+            e = f;
+            f = sub;
+        }
+
+        System.out.println("e: "+e);
+        System.out.println("f: "+f);
+
+        double scalePixelToBlock = Math.sqrt(c*c + d*d)/Math.sqrt(256*256 + 256*256);
+
+        System.out.println("Scale: "+scalePixelToBlock);
+
+
+
+        pixel[0] = (int) Math.round(e/scalePixelToBlock);
+        pixel[1] = (int) Math.round(f/scalePixelToBlock);
+
+    /*    if (pixel[0] < 0)
+            pixel[0] = pixel[0] + 256;
+
+        if (pixel[1] < 0)
+            pixel[1] = pixel[1] + 256;
+*/
+        System.out.println("e scaled "+e/scalePixelToBlock);
+        System.out.println("f scaled: "+f/scalePixelToBlock);
+
+        System.out.println(pixel[0] +", "+pixel[1]);
+        return pixel;
     }
 
     public static String getURL() {
