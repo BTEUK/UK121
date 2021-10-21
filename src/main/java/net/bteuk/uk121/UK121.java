@@ -13,6 +13,7 @@ import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.dimension.YLevels;
 import net.minecraft.world.gen.chunk.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,7 +87,6 @@ public class UK121 implements ModInitializer {
         Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
 
         //GeneratorTypeAccessor.getValues().add(VOID);
-
         LOGGER.info("UK121 Initialised!");
     }
 
