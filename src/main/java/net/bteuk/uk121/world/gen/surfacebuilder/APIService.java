@@ -20,20 +20,31 @@ public class APIService
 {
    // BufferedImage image = ImageIO.read(new ByteBufInputStream(buffer));
 
-    public static String downloadImage(String url, int xTile, int yTile)
+    public static String downloadImage(String url, int xTile, int yTile, int zoom)
     {
         BufferedImage image = null;
-        File file;
+        File newDirectory;
         String fileName = "";
+        String dirName = "";
         InputStream in = null;
         try
         {
+            //Makes the folders
+            dirName = "C://Elevation/"+zoom+"/"+xTile;
+            newDirectory = new File(dirName);
+            newDirectory.mkdirs();
+
+            //Creates the file
+            fileName = "C://Elevation/"+zoom+"/"+xTile+"/"+yTile+".png";
+            FileWriter fileWriter = new FileWriter(fileName);
+            boolean bCreated = false;
+            fileWriter.write("");
+
+            //Creates the link to the source
             URL website = new URL(url);
             in = website.openStream();
-            fileName = "C://Elevation/"+xTile+"/"+yTile+".png";
-            FileWriter fileWriter = new FileWriter(fileName);
-            fileWriter.write("");
-         //  Files.copy(in, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+            //  Files.copy(in, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
             ReadableByteChannel readChannel = Channels.newChannel(in);
             FileOutputStream fileOS = new FileOutputStream(fileName);
             FileChannel writeChannel = fileOS.getChannel();

@@ -12,45 +12,50 @@ import java.io.File;
 public class BlockAPICall {
     public static double dLongitude;
     public static double dLatitude;
-    public static final int zoom = 13;
+    public static final int zoom = 15;
 
     public static int xTile, yTile;
 
     public static void main(String[] args)
     {
-        getHeightforXZ(1,2,0);
+        System.out.println("Height: " +getHeightforXZ(2811200,-5390656,0));
     }
 
 
     public static int getHeightforXZ(double X, double Z, int iHeight) {
-     //   convertMCCordsToLongLat(X, Z);
+        convertMCCordsToLongLat(X, Z);
 
         //Calculates the tile
-        getTile(51.43731532501611, 0.38392490676395113, zoom);
+        getTile(dLatitude, dLongitude, zoom);
 
+        //Checks whether there is Lidar available, then cache and if it isn't in lidar or cache, source is set to the AWS API
         ElevationSource source = determineSource();
 
-        System.out.println("Source: "+source.toString());
+        System.out.println("Source: " + source.toString());
 
         String fileName = "";
 
         BufferedImage pngTile;
 
+        //Downloads the image if it is not found in cache
         if (source == ElevationSource.AWS_Terrain) {
             //Gets the URL
             String URL = getURL();
 
-            APIService.downloadImage(URL, xTile, yTile);
+            APIService.downloadImage(URL, xTile, yTile, zoom);
         }
 
-        fileName = "C://Elevation/" + xTile + "/" + yTile + ".png";
+        fileName = "C://Elevation/" +zoom +"/" +xTile +"/" +yTile +".png";
         File file = new File(fileName);
 
         try {
             pngTile = ImageIO.read(file);
-            int[] rgb = pngTile.getRGB(0, 0, 16, 16, null, 0, 16);
+               int[] rgb = pngTile.getRGB(0, 0, 16, 16, null, 0, 16);
 
-            iHeight = (rgb[0] * 256 + rgb[1] + rgb[2] / 256) - 32768;
+
+            //   iHeight = (rgb[0] * 256 + rgb[1] + rgb[2] / 256) - 32768;
+
+               iHeight = rgb[0];
         } catch (Exception e) {
 
         }
@@ -73,14 +78,16 @@ public class BlockAPICall {
     }
 
     public static void convertMCCordsToLongLat(double iX, double iZ) {
-        ModifiedAirocean projection = new ModifiedAirocean();
-        double[] longlat = projection.toGeo(iX, iZ);
+        ModifiedAirocean projections = new ModifiedAirocean();
+        double[] longlat = projections.toGeo(iX, iZ);
         dLongitude = longlat[0];
         dLatitude = longlat[1];
+        System.out.println("Long: "+longlat[0]);
+        System.out.println("Lat: "+longlat[1]);
     }
 
     public static ElevationSource determineSource() {
-        File file = new File("C://Elevation/" + xTile + "/" + yTile + ".png");
+        File file = new File("C://Elevation/" + zoom +"/" + xTile + "/" + yTile + ".png");
         if (file.exists())
             return ElevationSource.Cache;
 

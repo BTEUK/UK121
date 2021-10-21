@@ -20,8 +20,10 @@ public class ConformalEstimate extends Airocean {
         double[][] ys = new double[xs.length][];
 
         try {
+            File file = new File("conformal.txt");
+
             //is = new FileInputStream("../resources/assets/terra121/data/conformal.txt");
-            is = getClass().getClassLoader().getResourceAsStream("conformal.txt");
+            is = getClass().getClassLoader().getResourceAsStream("net/bteuk/uk121/world/gen/conformal.txt");
             Scanner sc = new Scanner(is);
 
             for (int u = 0; u < xs.length; u++) {
