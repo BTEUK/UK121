@@ -143,16 +143,16 @@ public class EarthGenerator extends ChunkGenerator {
         int[] Corner3 = BlockAPICall.getTile(x1, z1);;
 
         //If two opposite corners aren't in the same tile, declare a difference
-        if (!Corner1.equals(Corner3))
+        if (Corner1[0] != Corner3[0] || Corner1[1] != Corner3[1])
         {
             bAllInSameTile = false;
         }
-        else //If two of them are in the same tile, it doesnt confirm the whole chunk is in the correct tile.
+        else //If two of them are in the same tile, it doesn't confirm the whole chunk is in the correct tile.
         {
             int[] Corner2 = BlockAPICall.getTile(x0, z1);;
-            int[] Corner4 = BlockAPICall.getTile(x0, z0);;
+            int[] Corner4 = BlockAPICall.getTile(x1, z0);;
 
-            if (!Corner2.equals(Corner4))
+            if (Corner2[0] != Corner4[0] || Corner2[1] != Corner4[1])
             {
                 bAllInSameTile = false;
             }

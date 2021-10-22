@@ -28,7 +28,7 @@ public class BlockAPICall {
 
     public static void main(String[] args)
     {
-        System.out.println("Height: " +getTileAndHeightForXZ(2810630,-5390651,0));
+        System.out.println("Height: " +getTileAndHeightForXZ(2811800,-5390651,0));
     }
 
     public BlockAPICall(int xTile, int yTile, int zoom)
