@@ -1,7 +1,5 @@
 package net.bteuk.uk121.world.gen.Projections;
 
-
-
 public class ModifiedAirocean extends ConformalEstimate {
 
     protected static double THETA = -150*TO_RADIANS;

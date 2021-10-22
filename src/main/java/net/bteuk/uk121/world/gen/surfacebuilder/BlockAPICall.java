@@ -1,5 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacebuilder;
 
+import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 
 import javax.imageio.ImageIO;
@@ -7,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class BlockAPICall {
+
     public static ModifiedAirocean projections = new ModifiedAirocean();
 
     public static double dLongitude;
@@ -144,7 +146,7 @@ public class BlockAPICall {
             iHeight = (r * 256 + g + b / 256) - 32768;
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
                     /*
@@ -201,8 +203,11 @@ public class BlockAPICall {
 
     public static int[] getTile(double x, double y)
     {
+        UK121.LOGGER.info("1");
         double[] longLat = convertMCCordsToLongLat(x, y);
+        UK121.LOGGER.info("2");
         int[] Tile = getTile(longLat[1], longLat[0], zoom);
+        UK121.LOGGER.info("3");
         return Tile;
     }
 

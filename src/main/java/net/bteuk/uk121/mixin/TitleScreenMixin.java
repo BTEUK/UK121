@@ -1,27 +1,18 @@
 package net.bteuk.uk121.mixin;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.bteuk.uk121.UK121;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.CubeMapRenderer;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.RotatingCubeMapRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,7 +33,6 @@ public class TitleScreenMixin extends Screen {
     @Inject(at = @At("RETURN"), method = "render")
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 
-        float f = 1.0F;
         int j = this.width / 2 - 137;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, UK121.TITLE_SCREEN);
@@ -55,18 +45,12 @@ public class TitleScreenMixin extends Screen {
             RenderSystem.setShaderTexture(0, MINECRAFT_TITLE_TEXTURE);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, g);
             this.drawWithOutline(j, 30, (x, y) -> {
-                this.drawTexture(matrices, x + 0, y, 0, 0, 99, 44);
+                this.drawTexture(matrices, x, y, 0, 0, 99, 44);
                 this.drawTexture(matrices, x + 99, y, 129, 0, 27, 44);
                 this.drawTexture(matrices, x + 99 + 26, y, 126, 0, 3, 44);
                 this.drawTexture(matrices, x + 99 + 26 + 3, y, 99, 0, 26, 44);
                 this.drawTexture(matrices, x + 155, y, 0, 45, 155, 44);
             });
-                /*
-                this.drawWithOutline(j, 30, (x, y) -> {
-                    this.drawTexture(matrices, x + 0, y, 0, 0, 155, 44);
-                    this.drawTexture(matrices, x + 155, y, 0, 45, 155, 44);
-                });
-                */
 
             RenderSystem.setShaderTexture(0, EDITION_TITLE_TEXTURE);
             drawTexture(matrices, j + 88, 67, 0.0F, 0.0F, 98, 14, 128, 16);

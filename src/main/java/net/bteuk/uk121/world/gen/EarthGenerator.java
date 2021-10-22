@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.Config;
 import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
-import net.bteuk.uk121.world.gen.surfacebuilder.APIService;
 import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.BlockState;
