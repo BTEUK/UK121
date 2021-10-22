@@ -1,9 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacebuilder;
 
-import com.google.common.collect.BoundType;
-import net.bteuk.uk121.world.gen.Projections.GeographicProjection;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
-import net.minecraft.client.util.PngFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
