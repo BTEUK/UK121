@@ -109,28 +109,6 @@ public class EarthGenerator extends ChunkGenerator {
         //Create surfaceBuilder, which is where the blocks are actually generated.
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
-        /*
-
-        //Create an array from 0 to 255
-        int[] elev = new int[16*16];
-        for (int p = 0; p < 16*16; p++){
-            elev[p] = p;
-        }
-
-
-
-        //Iterate through each x,z of Chunk
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                x = x0 + i;
-                z = z0 + j;
-
-                //Generate a block at x,z with height elev[i+j*16] for testing purposes.
-                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, elev[i+j*16], 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
-            }
-        }
-        */
-
         //Used to store the height value fetched from the API call
         int iHeight;
 
@@ -140,7 +118,7 @@ public class EarthGenerator extends ChunkGenerator {
         boolean bAllInSameTile = true;
 
         //Gets the tile for each corner of the chunk
-        /*int[] Corner1 = BlockAPICall.getTile(x0, z0);
+        int[] Corner1 = BlockAPICall.getTile(x0, z0);
         int[] Corner3 = BlockAPICall.getTile(x1, z1);;
 
         //If two opposite corners aren't in the same tile, declare a difference
@@ -163,12 +141,11 @@ public class EarthGenerator extends ChunkGenerator {
         BlockAPICall ourTile = null;
 
         //Downloads the required tile if they are all the same
-        if (bAllInSameTile)
-        {
-            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
+        if (bAllInSameTile) {
+            ourTile = new BlockAPICall(Corner1[0], Corner1[1], 15);
             ourTile.loadPicture();
         }
-*/
+
         //For each x of chunk
         for (int i = 0; i < 16; i++)
         {
@@ -185,12 +162,12 @@ public class EarthGenerator extends ChunkGenerator {
                 iHeight = 0;
 
                 //Gets the height of a particular block
-/*
+
                 if (bAllInSameTile)
                     iHeight = ourTile.getHeightForXZ(x, z, iHeight);
                 else
                     iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
-                    */
+
                 //Generate a block at x,z with the correct height fetched from the api call.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }
