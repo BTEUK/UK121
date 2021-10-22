@@ -109,28 +109,6 @@ public class EarthGenerator extends ChunkGenerator {
         //Create surfaceBuilder, which is where the blocks are actually generated.
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
-        /*
-
-        //Create an array from 0 to 255
-        int[] elev = new int[16*16];
-        for (int p = 0; p < 16*16; p++){
-            elev[p] = p;
-        }
-
-
-
-        //Iterate through each x,z of Chunk
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                x = x0 + i;
-                z = z0 + j;
-
-                //Generate a block at x,z with height elev[i+j*16] for testing purposes.
-                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, elev[i+j*16], 0.0, defaultBlock, defaultFluid, 63, 0, 0, config);
-            }
-        }
-        */
-
         //Used to store the height value fetched from the API call
         int iHeight;
 
