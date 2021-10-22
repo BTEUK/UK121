@@ -140,7 +140,7 @@ public class EarthGenerator extends ChunkGenerator {
         boolean bAllInSameTile = true;
 
         //Gets the tile for each corner of the chunk
-        /*int[] Corner1 = BlockAPICall.getTile(x0, z0);
+        int[] Corner1 = BlockAPICall.getTile(x0, z0);
         int[] Corner3 = BlockAPICall.getTile(x1, z1);;
 
         //If two opposite corners aren't in the same tile, declare a difference
@@ -168,7 +168,7 @@ public class EarthGenerator extends ChunkGenerator {
             ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
             ourTile.loadPicture();
         }
-*/
+
         //For each x of chunk
         for (int i = 0; i < 16; i++)
         {
@@ -185,12 +185,12 @@ public class EarthGenerator extends ChunkGenerator {
                 iHeight = 0;
 
                 //Gets the height of a particular block
-/*
                 if (bAllInSameTile)
                     iHeight = ourTile.getHeightForXZ(x, z, iHeight);
                 else
+                {
                     iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
-                    */
+                }
                 //Generate a block at x,z with the correct height fetched from the api call.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }

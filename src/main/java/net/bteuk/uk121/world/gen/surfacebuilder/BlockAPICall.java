@@ -27,8 +27,19 @@ public class BlockAPICall {
     private boolean bFileRead = true;
 
     public static void main(String[] args)
-    {
-        System.out.println("Height: " +getTileAndHeightForXZ(2811800,-5390651,0));
+    { //2811800,-5390651
+        System.out.println("Height: " +getTileAndHeightForXZ(140, -317,0));
+        System.out.println();
+
+        int[] Corner1 = BlockAPICall.getTile(140, -317);
+        System.out.println("Corner 1 of non static: ");
+        System.out.println("xTile: "+Corner1[0]);
+        System.out.println("yTile: "+Corner1[1]);
+        System.out.println("zoom: "+zoom);
+
+        BlockAPICall test = new BlockAPICall(Corner1[0], Corner1[1], 15);
+        test.loadPicture();
+        System.out.println("Height: " +test.getHeightForXZ(140, -317, 0));
     }
 
     public BlockAPICall(int xTile, int yTile, int zoom)
@@ -56,10 +67,17 @@ public class BlockAPICall {
     }
     public int getHeightForXZ(double X, double Z, int iHeight)
     {
+        if (!bFileRead)
+        {
+            return 0;
+        }
         xBlock = X;
         yBlock = Z;
 
         convertMCCordsToLongLat(X, Z);
+
+        if (Double.isNaN(dLatitude))
+            return 0;
 
         int[] pixel = getPixel();
 
@@ -90,10 +108,9 @@ public class BlockAPICall {
 
     public static int getTileAndHeightForXZ(double X, double Z, int iHeight) {
         xBlock = X;
-        xBlock = Z;
-
+        yBlock = Z;
         convertMCCordsToLongLat(X, Z);
-        if (dLatitude == Double.NaN)
+        if (Double.isNaN(dLatitude))
             return 0;
 
         //Calculates the tile
@@ -101,8 +118,6 @@ public class BlockAPICall {
 
         //Checks whether there is Lidar available, then cache and if it isn't in lidar or cache, source is set to the AWS API
         ElevationSource source = determineSource();
-
-        System.out.println("Source: " + source.toString());
 
         String fileName = "";
 
@@ -156,8 +171,6 @@ public class BlockAPICall {
         double[] longlat = projections.toGeo(iX, iZ);
         dLongitude = longlat[0];
         dLatitude = longlat[1];
-        System.out.println("Long: "+longlat[0]);
-        System.out.println("Lat: "+longlat[1]);
         return longlat;
     }
 
@@ -192,7 +205,7 @@ public class BlockAPICall {
     public static int[] getTile(double x, double y)
     {
         double[] longLat = convertMCCordsToLongLat(x, y);
-        int[] Tile = getTile(longLat[0], longLat[1], zoom);
+        int[] Tile = getTile(longLat[1], longLat[0], zoom);
         return Tile;
     }
 
@@ -218,7 +231,7 @@ public class BlockAPICall {
         double d = blockSECorner[0] - blockNWCorner[0];
 
         double a = xBlock - blockNWCorner[0];
-        double b = xBlock - blockNWCorner[1];
+        double b = yBlock - blockNWCorner[1];
 
         double length = Math.sqrt(a*a + b*b);
 
@@ -241,8 +254,6 @@ public class BlockAPICall {
         }
 */
         double scalePixelToBlock = sqrt /Math.sqrt(256*256 + 256*256);
-
-        System.out.println("Scale: "+scalePixelToBlock);
 
         pixel[0] = (int) Math.round(e/scalePixelToBlock);
         pixel[1] = (int) Math.round(f/scalePixelToBlock);
