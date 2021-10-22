@@ -3,6 +3,7 @@ package net.bteuk.uk121.world.gen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.UK121;
+import net.bteuk.uk121.world.gen.surfacebuilder.APIService;
 import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.BlockState;
@@ -89,6 +90,9 @@ public class EarthGenerator extends ChunkGenerator {
         //Get the corner of the chunk in x and z.
         int x0 = chunkPos.getStartX();
         int z0 = chunkPos.getStartZ();
+        int x1 = chunkPos.getEndX();
+        int z1 = chunkPos.getEndZ();
+
 
         int x;
         int z;
@@ -120,6 +124,41 @@ public class EarthGenerator extends ChunkGenerator {
         //Used to store the height value fetched from the API call
         int iHeight;
 
+        //Test all 4 corners of chunk. If they lie in the same tile, standardise tile.
+
+        //Stores whether or not the chunk data can be received all from 1 tile
+        boolean bAllInSameTile = true;
+
+        //Gets the tile for each corner of the chunk
+        int[] Corner1 = BlockAPICall.getTile(x0, z0);
+        int[] Corner3 = BlockAPICall.getTile(x1, z1);;
+
+        //If two opposite corners aren't in the same tile, declare a difference
+        if (!Corner1.equals(Corner3))
+        {
+            bAllInSameTile = false;
+        }
+        else //If two of them are in the same tile, it doesnt confirm the whole chunk is in the correct tile.
+        {
+            int[] Corner2 = BlockAPICall.getTile(x0, z1);;
+            int[] Corner4 = BlockAPICall.getTile(x0, z0);;
+
+            if (!Corner2.equals(Corner4))
+            {
+                bAllInSameTile = false;
+            }
+        }
+
+        String URL;
+        BlockAPICall ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
+
+        //Downloads the required tile if they are all the same
+        if (bAllInSameTile)
+        {
+            URL = ourTile.getURL();
+            ourTile.fileName = APIService.downloadImage(URL, Corner1[0], Corner1[1], 15);
+        }
+
         //For each x of chunk
         for (int i = 0; i < 16; i++)
         {
@@ -136,8 +175,11 @@ public class EarthGenerator extends ChunkGenerator {
                 iHeight = 0;
 
                 //Gets the height of a particular block
-                iHeight = BlockAPICall.getHeightforXZ(x, z, iHeight);
 
+                if (bAllInSameTile)
+                    iHeight = ourTile.getHeightForXZ(x, z, iHeight);
+                else
+                    iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
                 //Generate a block at x,z with the correct height fetched from the api call.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, UK121.SEALEVEL, 0, 0, config);
             }
