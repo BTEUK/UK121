@@ -203,11 +203,8 @@ public class BlockAPICall {
 
     public static int[] getTile(double x, double y)
     {
-        UK121.LOGGER.info("1");
         double[] longLat = convertMCCordsToLongLat(x, y);
-        UK121.LOGGER.info("2");
         int[] Tile = getTile(longLat[1], longLat[0], zoom);
-        UK121.LOGGER.info("3");
         return Tile;
     }
 
