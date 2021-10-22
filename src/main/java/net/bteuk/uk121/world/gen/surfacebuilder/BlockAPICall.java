@@ -93,6 +93,8 @@ public class BlockAPICall {
         xBlock = Z;
 
         convertMCCordsToLongLat(X, Z);
+        if (dLatitude == Double.NaN)
+            return 0;
 
         //Calculates the tile
         getTile(dLatitude, dLongitude, zoom);
