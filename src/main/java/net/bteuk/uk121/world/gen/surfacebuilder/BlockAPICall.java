@@ -28,7 +28,7 @@ public class BlockAPICall {
 
     public static void main(String[] args)
     {
-        System.out.println("Height: " +getTileAndHeightForXZ(2810630,-5390651,0));
+        System.out.println("Height: " +getTileAndHeightForXZ(2811800,-5390651,0));
     }
 
     public BlockAPICall(int xTile, int yTile, int zoom)
@@ -37,6 +37,11 @@ public class BlockAPICall {
         this.xTile = xTile;
         this.yTile = yTile;
         this.url = getURL();
+    }
+
+    public void loadPicture()
+    {
+        fileName = APIService.downloadImage(url, xTile, yTile, zoom);
 
         file = new File(fileName);
 
@@ -49,7 +54,6 @@ public class BlockAPICall {
             bFileRead = false;
         }
     }
-
     public int getHeightForXZ(double X, double Z, int iHeight)
     {
         xBlock = X;
@@ -89,6 +93,8 @@ public class BlockAPICall {
         xBlock = Z;
 
         convertMCCordsToLongLat(X, Z);
+        if (dLatitude == Double.NaN)
+            return 0;
 
         //Calculates the tile
         getTile(dLatitude, dLongitude, zoom);
@@ -177,14 +183,16 @@ public class BlockAPICall {
             ytile = ((1 << zoom) - 1);
         xTile = xtile;
         yTile = ytile;
-        int[] tile = {xtile, ytile};
+        int[] tile = new int[2];
+        tile[0] = xTile;
+        tile[1] = yTile;
         return tile;
     }
 
     public static int[] getTile(double x, double y)
     {
         double[] longLat = convertMCCordsToLongLat(x, y);
-        int[] Tile = getTile(longLat[1], longLat[2], zoom);
+        int[] Tile = getTile(longLat[0], longLat[1], zoom);
         return Tile;
     }
 
