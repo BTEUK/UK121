@@ -2,6 +2,7 @@ package net.bteuk.uk121.world.gen.surfacebuilder;
 
 import com.mojang.serialization.Codec;
 import net.bteuk.uk121.Config;
+import net.bteuk.uk121.ConfigVariables;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
@@ -29,7 +30,7 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
         //chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
 
         //Generated defaultBlock at the specified height and everything below that.
-        for (int h = yMin; h <= height; h++)
+        for (int h = ConfigVariables.yMin; h <= height; h++)
         {
             if (h == height)
             {

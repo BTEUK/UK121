@@ -1,6 +1,7 @@
 package net.bteuk.uk121;
 
 import net.fabricmc.loader.api.FabricLoader;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,7 +20,8 @@ public class Config {
 
     public Config() {
 
-        Path directory = FabricLoader.getInstance().getGameDir().resolve("uk121");
+        Path directory = Path.of(System.getProperty("user.dir") + "/uk121/");
+        LogManager.getLogger("uk121").info(directory.toString());
         if (!Files.exists(directory)){
             try {
                 Files.createDirectory(directory);

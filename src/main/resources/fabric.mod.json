@@ -21,6 +21,9 @@
   "entrypoints": {
     "main": [
       "net.bteuk.uk121.UK121"
+    ],
+    "preLaunch": [
+      "net.bteuk.uk121.PreLaunch"
     ]
   },
   "mixins": [

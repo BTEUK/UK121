@@ -74,10 +74,6 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-        //Setup config variables from config
-        config = new Config();
-        config.load();
-
         //Adds the generator type to the accessor
         GeneratorTypeAccessor.getValues().add(EARTH);
         //Register custom empty biome
