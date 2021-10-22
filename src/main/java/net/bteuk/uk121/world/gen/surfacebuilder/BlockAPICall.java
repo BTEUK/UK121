@@ -177,7 +177,9 @@ public class BlockAPICall {
             ytile = ((1 << zoom) - 1);
         xTile = xtile;
         yTile = ytile;
-        int[] tile = {xtile, ytile};
+        int[] tile = new int[2];
+        tile[0] = xTile;
+        tile[1] = yTile;
         return tile;
     }
 

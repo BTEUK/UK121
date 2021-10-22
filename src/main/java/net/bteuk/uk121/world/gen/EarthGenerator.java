@@ -93,15 +93,8 @@ public class EarthGenerator extends ChunkGenerator {
         int x1 = chunkPos.getEndX();
         int z1 = chunkPos.getEndZ();
 
-
         int x;
         int z;
-
-        //Create an array from 0 to 255
-        int[] elev = new int[16*16];
-        for (int p = 0; p < 16*16; p++){
-            elev[p] = p;
-        }
 
         //Basic surface config, to be edited later.
         TernarySurfaceConfig config = new TernarySurfaceConfig(grassBlock, dirtBlock, stoneBlock);
@@ -109,6 +102,15 @@ public class EarthGenerator extends ChunkGenerator {
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
         /*
+
+        //Create an array from 0 to 255
+        int[] elev = new int[16*16];
+        for (int p = 0; p < 16*16; p++){
+            elev[p] = p;
+        }
+
+
+
         //Iterate through each x,z of Chunk
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
@@ -126,7 +128,7 @@ public class EarthGenerator extends ChunkGenerator {
 
         //Test all 4 corners of chunk. If they lie in the same tile, standardise tile.
 
-        //Stores whether or not the chunk data can be received all from 1 tile
+        //Stores whether or not the height data can be received all from 1 tile
         boolean bAllInSameTile = true;
 
         //Gets the tile for each corner of the chunk
