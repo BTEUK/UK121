@@ -37,6 +37,11 @@ public class BlockAPICall {
         this.xTile = xTile;
         this.yTile = yTile;
         this.url = getURL();
+    }
+
+    public void loadPicture()
+    {
+        fileName = APIService.downloadImage(url, xTile, yTile, zoom);
 
         file = new File(fileName);
 
@@ -49,7 +54,6 @@ public class BlockAPICall {
             bFileRead = false;
         }
     }
-
     public int getHeightForXZ(double X, double Z, int iHeight)
     {
         xBlock = X;
@@ -186,7 +190,7 @@ public class BlockAPICall {
     public static int[] getTile(double x, double y)
     {
         double[] longLat = convertMCCordsToLongLat(x, y);
-        int[] Tile = getTile(longLat[1], longLat[2], zoom);
+        int[] Tile = getTile(longLat[0], longLat[1], zoom);
         return Tile;
     }
 

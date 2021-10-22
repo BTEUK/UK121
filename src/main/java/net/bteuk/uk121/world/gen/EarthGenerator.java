@@ -159,13 +159,13 @@ public class EarthGenerator extends ChunkGenerator {
         }
 
         String URL;
-        BlockAPICall ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
+        BlockAPICall ourTile = null;
 
         //Downloads the required tile if they are all the same
         if (bAllInSameTile)
         {
-            URL = ourTile.getURL();
-            ourTile.fileName = APIService.downloadImage(URL, Corner1[0], Corner1[1], 15);
+            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
+            ourTile.loadPicture();
         }
 
         //For each x of chunk
