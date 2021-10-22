@@ -7,6 +7,7 @@ import net.bteuk.uk121.world.gen.biome.EarthPopulationSource;
 import net.bteuk.uk121.world.gen.biome.EmptyBiome;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.world.GeneratorType;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.DynamicRegistryManager;
@@ -28,19 +29,15 @@ public class UK121 implements ModInitializer {
 
     public static final String MOD_ID = "uk121";
 
-    //Value of lowest generated block.
-    //Future update this will be configurable.
-    public static final int YMIN = -512;
-    //Sealevel of EarthGenerator
-    //Future update this will be configurable.
-    public static final int SEALEVEL = 0;
-
     //Title Screen image.
     public static final Identifier TITLE_SCREEN = new Identifier("uk121:textures/gui/title/background/2.png");
 
     //Setup empty biome
     public static final RegistryKey<Biome> EMPTY_KEY = RegistryKey.of(Registry.BIOME_KEY, new Identifier(MOD_ID, "empty"));
     public static final Biome EMPTY = EmptyBiome.EMPTY;
+
+    private Config config;
+    public static Config CONFIG;
 
     //Adds the "void" generator type - used for testing
     private static final GeneratorType VOID = new GeneratorType("void")
@@ -77,6 +74,10 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
+        //Setup config variables from config
+        config = new Config();
+        config.load();
+
         //Adds the generator type to the accessor
         GeneratorTypeAccessor.getValues().add(EARTH);
         //Register custom empty biome
@@ -93,6 +94,7 @@ public class UK121 implements ModInitializer {
     public Identifier id(String... path){
         return new Identifier(MOD_ID, String.join(".", path));
     }
+
 
     /**
      * Earth's circumference around the equator, in meters.
