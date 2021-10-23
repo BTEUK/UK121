@@ -143,7 +143,7 @@ public class EarthGenerator extends ChunkGenerator {
         //Downloads the required tile if they are all the same
         if (bAllInSameTile)
         {
-            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15);
+            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15, z0, z0);
             ourTile.loadPicture();
         }
 
@@ -164,7 +164,7 @@ public class EarthGenerator extends ChunkGenerator {
 
                 //Gets the height of a particular block
                 if (bAllInSameTile)
-                    iHeight = ourTile.getHeightForXZ(x, z, iHeight);
+                    iHeight = ourTile.iHeights[i][j];
                 else
                 {
                     iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);

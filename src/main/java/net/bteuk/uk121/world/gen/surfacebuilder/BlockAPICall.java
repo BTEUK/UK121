@@ -5,6 +5,7 @@ import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 
 public class BlockAPICall {
     public static ModifiedAirocean projections = new ModifiedAirocean();
@@ -15,11 +16,18 @@ public class BlockAPICall {
 
     private static int xTile, yTile;
     private static double xBlock, yBlock;
+    private final double x0, z0;
+    private static double[] blockNWCorner;
+    private static double[] blockSECorner;
+    private static double c, d;
+    private static double diagonal;
+    private static double scalePixelToBlock;
 
     public static String url;
     public static String fileName;
     private static File file;
     private BufferedImage pngTile;
+    public int[][] iHeights = new int[16][16];
 
     private boolean bFileRead = true;
 
@@ -34,17 +42,32 @@ public class BlockAPICall {
         System.out.println("yTile: "+Corner1[1]);
         System.out.println("zoom: "+zoom);
 
-        BlockAPICall test = new BlockAPICall(Corner1[0], Corner1[1], 15);
-        test.loadPicture();
-        System.out.println("Height: " +test.getHeightForXZ(140, -317, 0));
+   //    BlockAPICall test = new BlockAPICall(Corner1[0], Corner1[1], 15);
+   //     test.loadPicture();
+   //     System.out.println("Height: " +test.getHeightForXZ(140, -317, 0));
     }
 
-    public BlockAPICall(int xTile, int yTile, int zoom)
+    public BlockAPICall(int xTile, int yTile, int zoom, double x0, double z0)
     {
         this.zoom = zoom;
         this.xTile = xTile;
         this.yTile = yTile;
         this.url = getURL();
+        this.x0 = x0;
+        this.z0 = z0;
+        getGeneralTileFigures();
+    }
+
+    public void getGeneralTileFigures()
+    {
+        //Find the block represented by the top left pixel
+        blockNWCorner = projections.fromGeo(longLat(xTile, yTile, zoom)[0],longLat(xTile, yTile, zoom)[1]);
+        blockSECorner = projections.fromGeo(longLat(xTile+1, yTile+1, zoom)[0],longLat(xTile+1, yTile+1, zoom)[1]);
+
+        c = blockSECorner[1] -  blockNWCorner[1];
+        d = blockSECorner[0] - blockNWCorner[0];
+
+        diagonal = Math.sqrt(c * c + d * d);
     }
 
     public void loadPicture()
@@ -61,51 +84,42 @@ public class BlockAPICall {
         {
             bFileRead = false;
         }
-    }
-    public int getHeightForXZ(double X, double Z, int iHeight)
-    {
         if (!bFileRead)
         {
-            return 0;
+            Arrays.fill(iHeights, 0);
+            return;
         }
-        xBlock = X;
-        yBlock = Z;
 
-        convertMCCordsToLongLat(X, Z);
+        int[] pixel;
+        int rgb, r, g, b;
+       // int a;
 
-        if (Double.isNaN(dLatitude))
-            return 0;
+        for (int i = 0 ; i < 16 ; i++)
+        {
+            xBlock = x0+i;
+            for (int j = 0 ; j < 16 ; j++)
+            {
+                yBlock = z0+j;
 
-        int[] pixel = getPixel();
+                pixel = getPixel();
 
-        int rgb = pngTile.getRGB(pixel[0], pixel[1]);
-        int a = (rgb>>24)&0xff;
-        int r = (rgb>>16)&0xff;
-        int g = (rgb>>8)&0xff;
-        int b = rgb&0xff;
+                rgb = pngTile.getRGB(pixel[0], pixel[1]);
+            //    a = (rgb>>24)&0xff;
+                r = (rgb>>16)&0xff;
+                g = (rgb>>8)&0xff;
+                b = rgb&0xff;
 
-        iHeight = (r * 256 + g + b / 256) - 32768;
+                rgb = (r * 256 + g + b / 256) - 32768;
 
-                    /*
-            double[] out = new double[resolution * resolution];
-
-            for (int i = 0; i < resolution * resolution; i++) {
-                int c = rgb[i];
-                if ((c >>> 24) != 0xFF) //nodata
-                {
-                    out[i] = Double.NaN;
-                } else
-                {
-                    out[i] = ((c & ~0xFF000000) - 0x00800000) * (1.0d / 256.0d);
-                }
+                iHeights[i][j] = rgb;
             }
-        */
-        return iHeight;
+        }
     }
 
     public static int getTileAndHeightForXZ(double X, double Z, int iHeight) {
         xBlock = X;
         yBlock = Z;
+
         convertMCCordsToLongLat(X, Z);
         if (Double.isNaN(dLatitude))
             return 0;
@@ -131,20 +145,36 @@ public class BlockAPICall {
         fileName = "C://Elevation/" +zoom +"/" +xTile +"/" +yTile +".png";
         File file = new File(fileName);
 
+        //Find the block represented by the top left and bottom right corners
+        blockNWCorner = projections.fromGeo(longLat(xTile, yTile, zoom)[0],longLat(xTile, yTile, zoom)[1]);
+        blockSECorner = projections.fromGeo(longLat(xTile+1, yTile+1, zoom)[0],longLat(xTile+1, yTile+1, zoom)[1]);
+
+        c = blockSECorner[1] -  blockNWCorner[1];
+        d = blockSECorner[0] - blockNWCorner[0];
+
+        diagonal = Math.sqrt(c * c + d * d);
+
         int[] pixel = getPixel();
+
+        boolean bFileRead = false;
 
         try {
             pngTile = ImageIO.read(file);
             int rgb = pngTile.getRGB(pixel[0], pixel[1]);
-            int a = (rgb>>24)&0xff;
-            int r = (rgb>>16)&0xff;
-            int g = (rgb>>8)&0xff;
-            int b = rgb&0xff;
-
+            //    int a = (rgb>>24)&0xff;
+            int r = (rgb >> 16) & 0xff;
+            int g = (rgb >> 8) & 0xff;
+            int b = rgb & 0xff;
+            bFileRead = true;
             iHeight = (r * 256 + g + b / 256) - 32768;
-
-        } catch (Exception e) {
-
+        }
+        catch (Exception e)
+        {
+            bFileRead = false;
+        }
+        if (!bFileRead)
+        {
+            return 0;
         }
 
                     /*
@@ -220,21 +250,15 @@ public class BlockAPICall {
     {
         int[] pixel = new int[2];
 
-        //Find the block represented by the top left pixel
-        double[] blockNWCorner = projections.fromGeo(longLat(xTile, yTile, zoom)[0],longLat(xTile, yTile, zoom)[1]);
-        double[] blockSECorner = projections.fromGeo(longLat(xTile+1, yTile+1, zoom)[0],longLat(xTile+1, yTile+1, zoom)[1]);
-
-        double c = blockSECorner[1] -  blockNWCorner[1];
-        double d = blockSECorner[0] - blockNWCorner[0];
-
         double a = xBlock - blockNWCorner[0];
         double b = yBlock - blockNWCorner[1];
 
         double length = Math.sqrt(a*a + b*b);
 
-        double sqrt = Math.sqrt(c * c + d * d);
+        System.out.println("Diagonal: "+diagonal);
+        System.out.println("Length: "+length);
 
-        double a1 = (d * a + c * b) / (sqrt * length);
+        double a1 = (d * a + c * b) / (diagonal * length);
 
         double angleW = Math.acos(Math.abs(a1));
 
@@ -250,7 +274,7 @@ public class BlockAPICall {
             f = sub;
         }
 */
-        double scalePixelToBlock = sqrt /Math.sqrt(256*256 + 256*256);
+        scalePixelToBlock = diagonal / Math.sqrt(256*256 + 256*256);
 
         pixel[0] = (int) Math.round(e/scalePixelToBlock);
         pixel[1] = (int) Math.round(f/scalePixelToBlock);
