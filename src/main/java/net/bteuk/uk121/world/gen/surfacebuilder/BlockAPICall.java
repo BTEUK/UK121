@@ -29,6 +29,8 @@ public class BlockAPICall {
     private BufferedImage pngTile;
     public int[][] iHeights = new int[16][16];
 
+    public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
+
     private boolean bFileRead = true;
 
     public static void main(String[] args)
@@ -142,7 +144,7 @@ public class BlockAPICall {
             APIService.downloadImage(URL, xTile, yTile, zoom);
         }
 
-        fileName = "C://Elevation/" +zoom +"/" +xTile +"/" +yTile +".png";
+        fileName = directory +zoom +"/" +xTile +"/" +yTile +".png";
         File file = new File(fileName);
 
         //Find the block represented by the top left and bottom right corners

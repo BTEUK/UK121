@@ -1,6 +1,6 @@
 package net.bteuk.uk121.world.gen.Projections;
 
-
+import net.bteuk.uk121.UK121;
 
 public class ModifiedAirocean extends ConformalEstimate {
 
@@ -10,6 +10,7 @@ public class ModifiedAirocean extends ConformalEstimate {
 
     public double[] fromGeo(double lon, double lat) {
         double[] c = super.fromGeo(lon, lat);
+
         double x=c[0], y=c[1];
 
         boolean easia = isEurasianPart(x,y);

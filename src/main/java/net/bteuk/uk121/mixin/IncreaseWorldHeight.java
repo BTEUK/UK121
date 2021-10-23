@@ -1,6 +1,5 @@
 package net.bteuk.uk121.mixin;
 
-import net.bteuk.uk121.Config;
 import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
 import net.minecraft.world.dimension.DimensionType;
@@ -29,7 +28,6 @@ public class IncreaseWorldHeight {
         this.minimumY = ConfigVariables.yMin;
         this.height = ConfigVariables.height;
         this.logicalHeight = ConfigVariables.height;
-        UK121.LOGGER.info(minimumY);
     }
 
 }

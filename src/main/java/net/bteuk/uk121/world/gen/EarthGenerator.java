@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.Config;
 import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
-import net.bteuk.uk121.world.gen.surfacebuilder.APIService;
 import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.BlockState;
@@ -169,6 +168,7 @@ public class EarthGenerator extends ChunkGenerator {
                 {
                     iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
                 }
+
                 //Generate a block at x,z with the correct height fetched from the api call.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }
