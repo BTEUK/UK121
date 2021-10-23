@@ -1,6 +1,5 @@
 package net.bteuk.uk121.world.gen.surfacebuilder;
 
-import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 
 import javax.imageio.ImageIO;
@@ -22,6 +21,8 @@ public class BlockAPICall {
     public static String fileName;
     private static File file;
     private BufferedImage pngTile;
+
+    public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
 
     private boolean bFileRead = true;
 
@@ -130,7 +131,7 @@ public class BlockAPICall {
             APIService.downloadImage(URL, xTile, yTile, zoom);
         }
 
-        fileName = "C://Elevation/" +zoom +"/" +xTile +"/" +yTile +".png";
+        fileName = directory +zoom +"/" +xTile +"/" +yTile +".png";
         File file = new File(fileName);
 
         int[] pixel = getPixel();

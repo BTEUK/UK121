@@ -21,10 +21,19 @@ public class Config {
     public Config() {
 
         Path directory = Path.of(System.getProperty("user.dir") + "/uk121/");
-        LogManager.getLogger("uk121").info(directory.toString());
+        Path elevations = Path.of(System.getProperty("user.dir") + "/uk121/Elevation/");
+
         if (!Files.exists(directory)){
             try {
                 Files.createDirectory(directory);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!Files.exists(elevations)){
+            try {
+                Files.createDirectory(elevations);
             } catch (IOException e) {
                 e.printStackTrace();
             }

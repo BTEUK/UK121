@@ -8,12 +8,11 @@ import net.bteuk.uk121.world.gen.biome.EarthPopulationSource;
 import net.bteuk.uk121.world.gen.biome.EmptyBiome;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.GeneratorType;
+import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.BuiltinRegistries;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.registry.*;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.*;
@@ -24,6 +23,7 @@ import java.util.*;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static net.minecraft.command.argument.MessageArgumentType.getMessage;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -90,9 +90,9 @@ public class UK121 implements ModInitializer {
         Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
-            dispatcher.register(literal("tpll").then(argument("coordinates", greedyString()))
-                    .executes(ctx -> Tpll.run(ctx.getSource(), getString(ctx, "coordinates"))));
+            Tpll.register(dispatcher);
         }));
+
 
         //GeneratorTypeAccessor.getValues().add(VOID);
         LOGGER.info("UK121 Initialised!");

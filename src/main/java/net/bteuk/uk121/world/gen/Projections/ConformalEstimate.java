@@ -1,5 +1,7 @@
 package net.bteuk.uk121.world.gen.Projections;
 
+import net.bteuk.uk121.UK121;
+
 import java.io.*;
 import java.util.Scanner;
 
@@ -18,14 +20,13 @@ public class ConformalEstimate extends Airocean {
 
         double[][] xs = new double[sideLength + 1][];
         double[][] ys = new double[xs.length][];
-
         try {
             File file = new File("conformal.txt");
 
             //is = new FileInputStream("../resources/assets/terra121/data/conformal.txt");
-            is = getClass().getClassLoader().getResourceAsStream("net/bteuk/uk121/world/gen/conformal.txt");
+            is = getClass().getClassLoader().getResourceAsStream("conformal.txt");
+            //is = getClass().getClassLoader().getResourceAsStream("net/bteuk/uk121/world/gen/conformal.txt");
             Scanner sc = new Scanner(is);
-
             for (int u = 0; u < xs.length; u++) {
                 double[] px = new double[xs.length - u];
                 double[] py = new double[xs.length - u];

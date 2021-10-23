@@ -19,6 +19,7 @@ import java.nio.file.attribute.FileAttribute;
 public class APIService
 {
    // BufferedImage image = ImageIO.read(new ByteBufInputStream(buffer));
+   public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
 
     public static String downloadImage(String url, int xTile, int yTile, int zoom)
     {
@@ -30,12 +31,12 @@ public class APIService
         try
         {
             //Makes the folders
-            dirName = "C://Elevation/"+zoom+"/"+xTile;
+            dirName = directory+zoom+"/"+xTile;
             newDirectory = new File(dirName);
             newDirectory.mkdirs();
 
             //Creates the file
-            fileName = "C://Elevation/"+zoom+"/"+xTile+"/"+yTile+".png";
+            fileName = directory+zoom+"/"+xTile+"/"+yTile+".png";
             FileWriter fileWriter = new FileWriter(fileName);
             boolean bCreated = false;
             fileWriter.write("");

@@ -1,30 +1,39 @@
 package net.bteuk.uk121.commands;
 
 
-import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.bteuk.uk121.ConfigVariables;
+import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.util.CoordinateParseUtils;
 import net.bteuk.uk121.util.LatLng;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
+import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.ChatUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.RegistryWorldView;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
+
 public class Tpll {
+
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(literal("tpll")
+                .then(argument("coordinates", greedyString())
+                        .executes(ctx -> run(ctx.getSource(), getString(ctx, "coordinates"))))
+                .executes(ctx -> run(ctx.getSource(), null)));
+    }
 
     public static int run(ServerCommandSource source, String coordinates) {
 
@@ -34,6 +43,11 @@ public class Tpll {
             self = source.getPlayer();
         } catch (CommandSyntaxException e) {
             source.sendError(Text.of("This command can only be executed by a player!"));
+            return 1;
+        }
+
+        if (coordinates == null) {
+            usage(self);
             return 1;
         }
 
@@ -89,12 +103,13 @@ public class Tpll {
 
         if (Double.isNaN(altitude)) {
             //Get world from registry
-            RegistryKey<World> worldKey = World.OVERWORLD;
-            DynamicRegistryManager registry = DynamicRegistryManager.create();
-            Registry<World> worldReg = registry.get(Registry.WORLD_KEY);
-            World world = worldReg.get(worldKey);
+            World world = MinecraftClient.getInstance().world;
             BlockPos loc = world.getTopPosition(Heightmap.Type.WORLD_SURFACE, new BlockPos(proj[0], 0, proj[1]));
             altitude = loc.getY();
+
+            if (altitude == ConfigVariables.yMin){
+                altitude = BlockAPICall.getTileAndHeightForXZ(proj[0], proj[1], 0);
+            }
         }
 
         LatLng finalDefaultCoords = defaultCoords;
@@ -104,56 +119,56 @@ public class Tpll {
 
         return 1;
 
+    }
+
+    private static void usage(PlayerEntity self) {
+        self.sendMessage(Text.of("/tpll <latitude> <longitude> [altitude]"), false);
+    }
+
+    private static String getRawArguments(String[] args) {
+        if (args.length == 0) {
+            return "";
+        }
+        if (args.length == 1) {
+            return args[0];
         }
 
-private static void usage(PlayerEntity self){
+        StringBuilder arguments = new StringBuilder(args[0].replace((char) 176, (char) 32).trim());
 
-        }
-
-private static String getRawArguments(String[]args){
-        if(args.length==0){
-        return"";
-        }
-        if(args.length==1){
-        return args[0];
-        }
-
-        StringBuilder arguments=new StringBuilder(args[0].replace((char)176,(char)32).trim());
-
-        for(int x=1;x<args.length;x++){
-        arguments.append(" ").append(args[x].replace((char)176,(char)32).trim());
+        for (int x = 1; x < args.length; x++) {
+            arguments.append(" ").append(args[x].replace((char) 176, (char) 32).trim());
         }
 
         return arguments.toString();
-        }
+    }
 
-private static String formatDecimal(double val){
+    private static String formatDecimal(double val) {
         return new DecimalFormat("##.#####").format(val);
-        }
+    }
 
-/**
- * Gets all objects in a string array above a given index
- *
- * @param args  Initial array
- * @param index Starting index
- * @return Selected array
- */
-private static String[]selectArray(String[]args,int index){
-        List<String> array=new ArrayList<>();
-        for(int i=index;i<args.length;i++){
-        array.add(args[i]);
-        }
-
-        return array.toArray(array.toArray(new String[array.size()]));
-        }
-
-private static String[]inverseSelectArray(String[]args,int index){
-        List<String> array=new ArrayList<>();
-        for(int i=0;i<index; i++){
-        array.add(args[i]);
+    /**
+     * Gets all objects in a string array above a given index
+     *
+     * @param args  Initial array
+     * @param index Starting index
+     * @return Selected array
+     */
+    private static String[] selectArray(String[] args, int index) {
+        List<String> array = new ArrayList<>();
+        for (int i = index; i < args.length; i++) {
+            array.add(args[i]);
         }
 
         return array.toArray(array.toArray(new String[array.size()]));
+    }
 
+    private static String[] inverseSelectArray(String[] args, int index) {
+        List<String> array = new ArrayList<>();
+        for (int i = 0; i < index; i++) {
+            array.add(args[i]);
         }
-        }
+
+        return array.toArray(array.toArray(new String[array.size()]));
+
+    }
+}

@@ -168,6 +168,7 @@ public class EarthGenerator extends ChunkGenerator {
                 {
                     iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
                 }
+
                 //Generate a block at x,z with the correct height fetched from the api call.
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }
