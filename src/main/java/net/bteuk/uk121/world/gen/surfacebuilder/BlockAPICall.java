@@ -23,6 +23,8 @@ public class BlockAPICall {
     private static double diagonal;
     private static double scalePixelToBlock;
 
+    private static final double TileDiagonal = Math.sqrt(256*256 + 256*256);
+
     public static String url;
     public static String fileName;
     private static File file;
@@ -104,6 +106,9 @@ public class BlockAPICall {
                 yBlock = z0+j;
 
                 pixel = getPixel();
+
+                System.out.println(pixel[0]);
+                System.out.println(pixel[1]);
 
                 rgb = pngTile.getRGB(pixel[0], pixel[1]);
             //    a = (rgb>>24)&0xff;
@@ -257,9 +262,6 @@ public class BlockAPICall {
 
         double length = Math.sqrt(a*a + b*b);
 
-        System.out.println("Diagonal: "+diagonal);
-        System.out.println("Length: "+length);
-
         double a1 = (d * a + c * b) / (diagonal * length);
 
         double angleW = Math.acos(Math.abs(a1));
@@ -276,8 +278,11 @@ public class BlockAPICall {
             f = sub;
         }
 */
-        scalePixelToBlock = diagonal / Math.sqrt(256*256 + 256*256);
 
+        System.out.println(diagonal);
+        scalePixelToBlock = diagonal / TileDiagonal;
+
+        System.out.println(scalePixelToBlock);
         pixel[0] = (int) Math.round(e/scalePixelToBlock);
         pixel[1] = (int) Math.round(f/scalePixelToBlock);
 
