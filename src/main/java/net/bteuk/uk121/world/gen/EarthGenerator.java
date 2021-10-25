@@ -142,7 +142,7 @@ public class EarthGenerator extends ChunkGenerator {
         //Downloads the required tile if they are all the same
         if (bAllInSameTile)
         {
-            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15, z0, z0);
+            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15, x0, z0);
             ourTile.loadPicture();
         }
 

@@ -19,7 +19,7 @@ import java.nio.file.attribute.FileAttribute;
 public class APIService
 {
    // BufferedImage image = ImageIO.read(new ByteBufInputStream(buffer));
-   public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
+   public static String directory = "C:/Users/georg/IdeaProjects/uk121/Elevation/";
 
     public static String downloadImage(String url, int xTile, int yTile, int zoom)
     {

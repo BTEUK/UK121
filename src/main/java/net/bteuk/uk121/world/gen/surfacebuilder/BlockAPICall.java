@@ -31,7 +31,7 @@ public class BlockAPICall {
     private BufferedImage pngTile;
     public int[][] iHeights = new int[16][16];
 
-    public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
+    public static String directory = "C:/Users/georg/IdeaProjects/uk121/Elevation/";
 
     private boolean bFileRead = true;
 
@@ -107,14 +107,11 @@ public class BlockAPICall {
 
                 pixel = getPixel();
 
-                System.out.println(pixel[0]);
-                System.out.println(pixel[1]);
-
                 rgb = pngTile.getRGB(pixel[0], pixel[1]);
-            //    a = (rgb>>24)&0xff;
-                r = (rgb>>16)&0xff;
-                g = (rgb>>8)&0xff;
-                b = rgb&0xff;
+                //    a = (rgb>>24)&0xff;
+                r = (rgb >> 16) & 0xff;
+                g = (rgb >> 8) & 0xff;
+                b = rgb & 0xff;
 
                 rgb = (r * 256 + g + b / 256) - 32768;
 
@@ -209,7 +206,7 @@ public class BlockAPICall {
     }
 
     public static ElevationSource determineSource() {
-        File file = new File("C://Elevation/" + zoom +"/" + xTile + "/" + yTile + ".png");
+        File file = new File(directory + zoom +"/" + xTile + "/" + yTile + ".png");
         if (file.exists())
             return ElevationSource.Cache;
 
@@ -255,6 +252,8 @@ public class BlockAPICall {
 
     public static int[] getPixel()
     {
+        System.out.println();
+
         int[] pixel = new int[2];
 
         double a = xBlock - blockNWCorner[0];
@@ -262,7 +261,11 @@ public class BlockAPICall {
 
         double length = Math.sqrt(a*a + b*b);
 
+        System.out.println(length);
+
         double a1 = (d * a + c * b) / (diagonal * length);
+
+        System.out.println(a1);
 
         double angleW = Math.acos(Math.abs(a1));
 
@@ -279,10 +282,8 @@ public class BlockAPICall {
         }
 */
 
-        System.out.println(diagonal);
         scalePixelToBlock = diagonal / TileDiagonal;
 
-        System.out.println(scalePixelToBlock);
         pixel[0] = (int) Math.round(e/scalePixelToBlock);
         pixel[1] = (int) Math.round(f/scalePixelToBlock);
 
@@ -292,6 +293,7 @@ public class BlockAPICall {
         if (pixel[1] < 0)
             pixel[1] = pixel[1] + 256;
 */
+
         return pixel;
     }
 
