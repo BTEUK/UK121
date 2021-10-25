@@ -1,5 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacebuilder;
 
+import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 
 import javax.imageio.ImageIO;
@@ -16,7 +17,7 @@ public class BlockAPICall {
 
     private static int xTile, yTile;
     private static double xBlock, yBlock;
-    private final double x0, z0;
+    private final int x0, z0;
     private static double[] blockNWCorner;
     private static double[] blockSECorner;
     private static double c, d;
@@ -31,27 +32,11 @@ public class BlockAPICall {
     private BufferedImage pngTile;
     public int[][] iHeights = new int[16][16];
 
-    public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
+    public static String directory = UK121.directory + "Elevation/";
 
     private boolean bFileRead = true;
 
-    public static void main(String[] args)
-    { //2811800,-5390651
-        System.out.println("Height: " +getTileAndHeightForXZ(140, -317,0));
-        System.out.println();
-
-        int[] Corner1 = BlockAPICall.getTile(140, -317);
-        System.out.println("Corner 1 of non static: ");
-        System.out.println("xTile: "+Corner1[0]);
-        System.out.println("yTile: "+Corner1[1]);
-        System.out.println("zoom: "+zoom);
-
-   //    BlockAPICall test = new BlockAPICall(Corner1[0], Corner1[1], 15);
-   //     test.loadPicture();
-   //     System.out.println("Height: " +test.getHeightForXZ(140, -317, 0));
-    }
-
-    public BlockAPICall(int xTile, int yTile, int zoom, double x0, double z0)
+    public BlockAPICall(int xTile, int yTile, int zoom, int x0, int z0)
     {
         this.zoom = zoom;
         this.xTile = xTile;
@@ -60,6 +45,13 @@ public class BlockAPICall {
         this.x0 = x0;
         this.z0 = z0;
         getGeneralTileFigures();
+    }
+
+    public BlockAPICall(int zoom, int x0, int z0)
+    {
+        this.zoom = zoom;
+        this.x0 = x0;
+        this.z0 = z0;
     }
 
     public void getGeneralTileFigures()
@@ -107,10 +99,13 @@ public class BlockAPICall {
 
                 pixel = getPixel();
 
-                System.out.println(pixel[0]);
-                System.out.println(pixel[1]);
-
-                rgb = pngTile.getRGB(pixel[0], pixel[1]);
+                //System.out.println(pixel[0]);
+                //System.out.println(pixel[1]);
+                try {
+                    rgb = pngTile.getRGB(pixel[0], pixel[1]);
+                } catch (ArrayIndexOutOfBoundsException e){
+                    rgb = 0;
+                }
             //    a = (rgb>>24)&0xff;
                 r = (rgb>>16)&0xff;
                 g = (rgb>>8)&0xff;
@@ -123,7 +118,7 @@ public class BlockAPICall {
         }
     }
 
-    public static int getTileAndHeightForXZ(double X, double Z, int iHeight) {
+    public static int getTileAndHeightForXZ(int X, int Z) {
         xBlock = X;
         yBlock = Z;
 
@@ -149,7 +144,7 @@ public class BlockAPICall {
             APIService.downloadImage(URL, xTile, yTile, zoom);
         }
 
-        fileName = directory +zoom +"/" +xTile +"/" +yTile +".png";
+        fileName = directory + zoom +"-" +xTile +"-" +yTile +".png";
         File file = new File(fileName);
 
         //Find the block represented by the top left and bottom right corners
@@ -173,13 +168,9 @@ public class BlockAPICall {
             int g = (rgb >> 8) & 0xff;
             int b = rgb & 0xff;
             bFileRead = true;
-            iHeight = (r * 256 + g + b / 256) - 32768;
+            return ((r * 256 + g + b / 256) - 32768);
         }
         catch (Exception e)
-        {
-            bFileRead = false;
-        }
-        if (!bFileRead)
         {
             return 0;
         }
@@ -198,7 +189,6 @@ public class BlockAPICall {
                 }
             }
         */
-        return iHeight;
     }
 
     public static double[] convertMCCordsToLongLat(double iX, double iZ) {
@@ -209,7 +199,7 @@ public class BlockAPICall {
     }
 
     public static ElevationSource determineSource() {
-        File file = new File("C://Elevation/" + zoom +"/" + xTile + "/" + yTile + ".png");
+        File file = new File(directory + zoom +"-" + xTile + "-" + yTile + ".png");
         if (file.exists())
             return ElevationSource.Cache;
 
@@ -279,10 +269,10 @@ public class BlockAPICall {
         }
 */
 
-        System.out.println(diagonal);
+        //System.out.println(diagonal);
         scalePixelToBlock = diagonal / TileDiagonal;
 
-        System.out.println(scalePixelToBlock);
+        //System.out.println(scalePixelToBlock);
         pixel[0] = (int) Math.round(e/scalePixelToBlock);
         pixel[1] = (int) Math.round(f/scalePixelToBlock);
 

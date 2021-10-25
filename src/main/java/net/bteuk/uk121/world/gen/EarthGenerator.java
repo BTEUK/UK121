@@ -26,6 +26,8 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import static java.lang.Math.max;
+
 public class EarthGenerator extends ChunkGenerator {
 
     protected final Random random;
@@ -42,11 +44,13 @@ public class EarthGenerator extends ChunkGenerator {
     private final BiomeSource populationSource;
     private final BiomeSource biomeSource;
 
-    private int seaLevel;
+    //Height api
+    private BlockAPICall elevationAPI;
+
 
     public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            BiomeSource.CODEC.fieldOf("earth_population_source").forGetter((EarthGenerator) -> EarthGenerator.populationSource),
-            BiomeSource.CODEC.fieldOf("earth_biome_source").forGetter((EarthGenerator) -> EarthGenerator.biomeSource))
+                    BiomeSource.CODEC.fieldOf("earth_population_source").forGetter((EarthGenerator) -> EarthGenerator.populationSource),
+                    BiomeSource.CODEC.fieldOf("earth_biome_source").forGetter((EarthGenerator) -> EarthGenerator.biomeSource))
             .apply(instance, instance.stable(EarthGenerator::new)));
 
     public EarthGenerator(BiomeSource populationSource, BiomeSource biomeSource) {
@@ -61,16 +65,15 @@ public class EarthGenerator extends ChunkGenerator {
         defaultFluid = Blocks.WATER.getDefaultState();
         this.populationSource = populationSource;
         this.biomeSource = biomeSource;
+        //elevationAPI = new BlockAPICall();
 
 
         Config config = new Config();
         config.load();
-        seaLevel = config.seaLevel;
 
     }
 
-    private static StrongholdConfig StrongholdConfigSetup()
-    {
+    private static StrongholdConfig StrongholdConfigSetup() {
         StrongholdConfig ourStrongholdConfig = new StrongholdConfig(iDistance, iSpread, iCount);
         return ourStrongholdConfig;
     }
@@ -109,8 +112,27 @@ public class EarthGenerator extends ChunkGenerator {
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
         //Used to store the height value fetched from the API call
-        int iHeight;
+        int iHeight = 0;
 
+        if (isNullIsland(cx, cz)) {
+            //For each x of chunk
+            for (int i = 0; i < 16; i++) {
+                //Updates the actual x coordinate
+                x = x0 + i;
+
+                //For each z of each x
+                for (int j = 0; j < 16; j++) {
+                    //Updates the actual z coordinate
+                    z = z0 + j;
+
+
+                    //Generate a block at x,z with the correct height fetched from the api call.
+                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+                }
+            }
+
+            return;
+        }
         //Test all 4 corners of chunk. If they lie in the same tile, standardise tile.
 
         //Stores whether or not the height data can be received all from 1 tile
@@ -118,55 +140,46 @@ public class EarthGenerator extends ChunkGenerator {
 
         //Gets the tile for each corner of the chunk
         int[] Corner1 = BlockAPICall.getTile(x0, z0);
-        int[] Corner3 = BlockAPICall.getTile(x1, z1);;
+        int[] Corner3 = BlockAPICall.getTile(x1, z1);
 
         //If two opposite corners aren't in the same tile, declare a difference
-        if (Corner1[0] != Corner3[0] || Corner1[1] != Corner3[1])
-        {
+        if (Corner1[0] != Corner3[0] || Corner1[1] != Corner3[1]) {
             bAllInSameTile = false;
-        }
-        else //If two of them are in the same tile, it doesn't confirm the whole chunk is in the correct tile.
+        } else //If two of them are in the same tile, it doesn't confirm the whole chunk is in the correct tile.
         {
-            int[] Corner2 = BlockAPICall.getTile(x0, z1);;
-            int[] Corner4 = BlockAPICall.getTile(x1, z0);;
+            int[] Corner2 = BlockAPICall.getTile(x0, z1);
+            int[] Corner4 = BlockAPICall.getTile(x1, z0);
 
-            if (Corner2[0] != Corner4[0] || Corner2[1] != Corner4[1])
-            {
+            if (Corner2[0] != Corner4[0] || Corner2[1] != Corner4[1]) {
                 bAllInSameTile = false;
             }
         }
 
-        String URL;
         BlockAPICall ourTile = null;
 
         //Downloads the required tile if they are all the same
-        if (bAllInSameTile)
-        {
-            ourTile = new BlockAPICall(Corner1[0],  Corner1[1], 15, z0, z0);
+        if (bAllInSameTile) {
+            ourTile = new BlockAPICall(Corner1[0], Corner1[1], 15, x0, z0);
             ourTile.loadPicture();
+        } else {
+            ourTile = new BlockAPICall(15, x0, z0);
         }
 
         //For each x of chunk
-        for (int i = 0; i < 16; i++)
-        {
+        for (int i = 0; i < 16; i++) {
             //Updates the actual x coordinate
             x = x0 + i;
 
             //For each z of each x
-            for (int j = 0; j < 16; j++)
-            {
+            for (int j = 0; j < 16; j++) {
                 //Updates the actual z coordinate
                 z = z0 + j;
 
-                //This value is purely for testing purposes, until the height generation is complete.
-                iHeight = 0;
-
                 //Gets the height of a particular block
-                if (bAllInSameTile)
+                if (bAllInSameTile) {
                     iHeight = ourTile.iHeights[i][j];
-                else
-                {
-                    iHeight = BlockAPICall.getTileAndHeightForXZ(x, z, iHeight);
+                } else {
+                    iHeight = ourTile.getTileAndHeightForXZ(x, z);
                 }
 
                 //Generate a block at x,z with the correct height fetched from the api call.
@@ -184,7 +197,6 @@ public class EarthGenerator extends ChunkGenerator {
     }
 
 
-
     @Override
     public int getHeight(int x, int z, Heightmap.Type heightmap, HeightLimitView world) {
         UK121.LOGGER.info("getHeight!");
@@ -195,5 +207,9 @@ public class EarthGenerator extends ChunkGenerator {
     public VerticalBlockSample getColumnSample(int x, int z, HeightLimitView world) {
         UK121.LOGGER.info("getColumnSample!");
         return new VerticalBlockSample(0, new BlockState[0]);
+    }
+
+    public static boolean isNullIsland(int chunkX, int chunkZ) {
+        return max(chunkX ^ (chunkX >> 31), chunkZ ^ (chunkZ >> 31)) < 3;
     }
 }

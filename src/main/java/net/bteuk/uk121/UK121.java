@@ -19,6 +19,7 @@ import net.minecraft.world.gen.chunk.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.*;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -32,6 +33,8 @@ public class UK121 implements ModInitializer {
     // It is considered best practice to use your mod id as the logger's name.
     // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LogManager.getLogger("uk121");
+
+    public static final String directory = System.getProperty("user.dir") + "/uk121/";
 
     public static final String MOD_ID = "uk121";
 

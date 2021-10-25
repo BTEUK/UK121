@@ -2,6 +2,8 @@ package net.bteuk.uk121.world.gen.surfacebuilder;
 
 // import io.netty.buffer.ByteBufInputStream;
 
+import net.bteuk.uk121.UK121;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -19,7 +21,7 @@ import java.nio.file.attribute.FileAttribute;
 public class APIService
 {
    // BufferedImage image = ImageIO.read(new ByteBufInputStream(buffer));
-   public static String directory = System.getProperty("user.dir") + "/uk121/Elevation/";
+   public static String directory = UK121.directory + "Elevation/";
 
     public static String downloadImage(String url, int xTile, int yTile, int zoom)
     {
@@ -30,13 +32,8 @@ public class APIService
         InputStream in = null;
         try
         {
-            //Makes the folders
-            dirName = directory+zoom+"/"+xTile;
-            newDirectory = new File(dirName);
-            newDirectory.mkdirs();
-
             //Creates the file
-            fileName = directory+zoom+"/"+xTile+"/"+yTile+".png";
+            fileName = directory+zoom+"-"+xTile+"-"+yTile+".png";
             FileWriter fileWriter = new FileWriter(fileName);
             boolean bCreated = false;
             fileWriter.write("");

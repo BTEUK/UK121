@@ -108,7 +108,7 @@ public class Tpll {
             altitude = loc.getY();
 
             if (altitude == ConfigVariables.yMin){
-                altitude = BlockAPICall.getTileAndHeightForXZ(proj[0], proj[1], 0);
+                altitude = BlockAPICall.getTileAndHeightForXZ((int) proj[0], (int) proj[1]);
             }
         }
 
