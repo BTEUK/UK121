@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.Config;
 import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
+import net.bteuk.uk121.world.gen.elevation.ElevationManager;
 import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
 import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
 import net.minecraft.block.BlockState;
@@ -45,7 +46,8 @@ public class EarthGenerator extends ChunkGenerator {
     private final BiomeSource biomeSource;
 
     //Height api
-    private BlockAPICall elevationAPI;
+    private ElevationManager elevationManager;
+    private int[][] heights;
 
 
     public static final Codec<EarthGenerator> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
@@ -65,7 +67,8 @@ public class EarthGenerator extends ChunkGenerator {
         defaultFluid = Blocks.WATER.getDefaultState();
         this.populationSource = populationSource;
         this.biomeSource = biomeSource;
-        //elevationAPI = new BlockAPICall();
+
+        elevationManager = new ElevationManager();
 
 
         Config config = new Config();
@@ -133,6 +136,25 @@ public class EarthGenerator extends ChunkGenerator {
 
             return;
         }
+
+        heights = elevationManager.getHeights(x0, x1, z0, z1);
+
+        //For each x of chunk
+        for (int i = 0; i < 16; i++) {
+            //Updates the actual x coordinate
+            x = x0 + i;
+
+            //For each z of each x
+            for (int j = 0; j < 16; j++) {
+                //Updates the actual z coordinate
+                z = z0 + j;
+
+                //Generate a block at x,z with the correct height fetched from the api call.
+                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+            }
+        }
+
+        /*
         //Test all 4 corners of chunk. If they lie in the same tile, standardise tile.
 
         //Stores whether or not the height data can be received all from 1 tile
@@ -186,6 +208,8 @@ public class EarthGenerator extends ChunkGenerator {
                 surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }
         }
+
+         */
     }
 
     @Override
