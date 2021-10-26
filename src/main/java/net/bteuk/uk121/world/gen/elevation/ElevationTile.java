@@ -37,7 +37,6 @@ public class ElevationTile {
 
         lonRange = coordMax[0]-coordMin[0];
         latRange = coordMax[1]-coordMin[1];
-        UK121.LOGGER.info("Range: " + lonRange + ", " + latRange );
 
         accessed = true;
 
@@ -73,6 +72,10 @@ public class ElevationTile {
         pixel1 = (int) (((lon-coordMin[0]) / lonRange) * 256);
         pixel2 = (int) (((coordMax[1]-lat) / latRange) * 256);
 
+        if (pixel1 > 255 || pixel2 > 255 || pixel1 < 0 || pixel2 < 0) {
+            return 0;
+        }
+
         try {
             int rgb = pngTile.getRGB(pixel1, pixel2);
             int r = (rgb >> 16) & 0xff;
@@ -82,7 +85,6 @@ public class ElevationTile {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return 0;
         }
     }

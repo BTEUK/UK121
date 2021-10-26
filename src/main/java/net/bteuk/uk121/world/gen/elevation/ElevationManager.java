@@ -86,10 +86,10 @@ public class ElevationManager {
         rowlat = (coord4[1] - coord1[1])/16;
 
         //Get the tiles of the 4 extreme points.
-        tile1 = getTile(min(coord1[0], coord2[0]), min(coord1[1], coord2[1]), zoom);
-        tile2 = getTile(min(coord1[0], coord2[0]), max(coord1[1], coord2[1]), zoom);
-        tile3 = getTile(max(coord1[0], coord2[0]), min(coord1[1], coord2[1]), zoom);
-        tile4 = getTile(max(coord1[0], coord2[0]), max(coord1[1], coord2[1]), zoom);
+        tile1 = getTile(coord1[0], coord1[1], zoom);
+        tile2 = getTile(coord2[0], coord2[1], zoom);
+        tile3 = getTile(coord3[0], coord3[1], zoom);
+        tile4 = getTile(coord4[0], coord4[1], zoom);
 
         //Clear the list of tiles that will be used to get heights.
         usedTiles.clear();
@@ -112,7 +112,7 @@ public class ElevationManager {
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j<16; j++) {
                 for (ElevationTile elevationTile : usedTiles) {
-                    if (elevationTile.contains(lon, lat) && heights[i][j] == 0) {
+                    if (heights[i][j] == 0) {
                         heights[i][j] = elevationTile.getHeight(lon, lat);
                     }
                 }
