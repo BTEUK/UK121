@@ -120,7 +120,8 @@ public class ElevationManager {
         lat = coord1[1];
 
         //Stores whether height data was located for each block and what zoom level it current is at
-        int[] iHeightGot = {0};
+        int[] iHeightGot = {0}; //The value determines to which zoom level the height is of.
+                                // 0 means that no height has been found yet for any zoom level
 
         //Iterate over each block in the chunk and increment the lon/lat accordingly.
         for (int i = 0; i < 16; i++) {
@@ -128,7 +129,7 @@ public class ElevationManager {
                 iHeightGot[0] = 0;
                 for (ElevationTile elevationTile : usedTiles) {
                     if (/*heights[i][j] == 0 || */iHeightGot[0]!=15) { //If zoom level is not 15, keep going through the tiles to get a better one
-                        heights[i][j] = elevationTile.getHeight(lon, lat, iHeightGot);
+                        heights[i][j] = elevationTile.getHeight(lon, lat, iHeightGot); //If height is found from this tile, iHeightGot[0] will update to the zoom of the tile
                     }
                     if (iHeightGot[0] == 0) //If data was not obtained from any of the tiles
                         heights[i][j] = -30;
