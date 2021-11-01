@@ -40,4 +40,29 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
             }
         }
     }
+
+    public void generateWater(Random random, Chunk chunk, Biome biome, int x, int z, int height, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int i, long l, TernarySurfaceConfig surfaceConfig) {
+
+        //Generates defaultBlock at the specified location x,height,z
+        //chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
+
+        //Generated defaultBlock at the specified height and everything below that.
+        for (int h = ConfigVariables.yMin; h <= height; h++)
+        {
+            if (h == height)
+            {
+                chunk.setBlockState(new BlockPos(x, h, z), surfaceConfig.getTopMaterial(), false);
+            } else {
+                chunk.setBlockState(new BlockPos(x, h, z), defaultBlock, false);
+            }
+        }
+
+        for (int h = height+1 ; h < seaLevel; h++)
+        {
+            chunk.setBlockState(new BlockPos(x, h, z), defaultFluid, false);
+        }
+    }
+
+
 }
+

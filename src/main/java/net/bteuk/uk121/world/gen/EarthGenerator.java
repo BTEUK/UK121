@@ -111,6 +111,10 @@ public class EarthGenerator extends ChunkGenerator {
 
         //Basic surface config, to be edited later.
         TernarySurfaceConfig config = new TernarySurfaceConfig(grassBlock, dirtBlock, stoneBlock);
+
+        //Seabed surface
+        TernarySurfaceConfig seabed = new TernarySurfaceConfig(dirtBlock, dirtBlock, stoneBlock);
+
         //Create surfaceBuilder, which is where the blocks are actually generated.
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
@@ -150,7 +154,13 @@ public class EarthGenerator extends ChunkGenerator {
                 z = z0 + j;
 
                 //Generate a block at x,z with the correct height fetched from the api call.
-                surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+
+                if (heights[i][j] == -30) //Default value
+                {
+                    surfaceBuilder.generateWater(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, -30, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, seabed);
+                }
+                else
+                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
             }
         }
 

@@ -28,9 +28,12 @@ public class ElevationTile {
     private File file;
     private BufferedImage pngTile;
 
-    public ElevationTile(String name, int x, int y, int zoom) {
+    private int zoom;
 
+    public ElevationTile(String name, int x, int y, int zoom) {
         this.name = name;
+
+        this.zoom = zoom;
 
         coordMin = new double[]{tile2lon(x, zoom), tile2lat(y + 1, zoom)};
         coordMax = new double[]{tile2lon(x + 1, zoom), tile2lat(y, zoom)};
@@ -67,7 +70,7 @@ public class ElevationTile {
     }
 
     //Get the height at a given coordinate.
-    public int getHeight(double lon, double lat) {
+    public int getHeight(double lon, double lat, int[] iHeightGot) {
 
         pixel1 = (int) (((lon-coordMin[0]) / lonRange) * 256);
         pixel2 = (int) (((coordMax[1]-lat) / latRange) * 256);
@@ -81,11 +84,13 @@ public class ElevationTile {
             int r = (rgb >> 16) & 0xff;
             int g = (rgb >> 8) & 0xff;
             int b = rgb & 0xff;
+            iHeightGot[0] = this.zoom;
             return ((r * 256 + g + b / 256) - 32768);
         }
         catch (Exception e)
         {
-            return 0;
+            System.out.println("Error TING");
+            return -30;
         }
     }
 }

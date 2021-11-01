@@ -15,6 +15,7 @@ public class ElevationManager {
     public HashSet<ElevationTile> usedTiles;
 
     int[] tile1, tile2, tile3, tile4;
+    int[] tile1Z10, tile2Z10, tile3Z10, tile4Z10;
     double[] coord1, coord2, coord3, coord4;
 
     double lon, lat, steplon, steplat, rowlon, rowlat;
@@ -91,6 +92,12 @@ public class ElevationManager {
         tile3 = getTile(coord3[0], coord3[1], zoom);
         tile4 = getTile(coord4[0], coord4[1], zoom);
 
+        //Get the tiles of the 4 extreme points but zoom 10 for ocean
+        tile1Z10 = getTile(coord1[0], coord1[1], 10);
+        tile2Z10 = getTile(coord2[0], coord2[1], 10);
+        tile3Z10 = getTile(coord3[0], coord3[1], 10);
+        tile4Z10 = getTile(coord4[0], coord4[1], 10);
+
         //Clear the list of tiles that will be used to get heights.
         usedTiles.clear();
 
@@ -100,6 +107,10 @@ public class ElevationManager {
         usedTiles.add(loadTile(tile2, zoom));
         usedTiles.add(loadTile(tile3, zoom));
         usedTiles.add(loadTile(tile4, zoom));
+        usedTiles.add(loadTile(tile1Z10, 10));
+        usedTiles.add(loadTile(tile2Z10, 10));
+        usedTiles.add(loadTile(tile3Z10, 10));
+        usedTiles.add(loadTile(tile4Z10, 10));
 
         //Create a new array of heights to be stored.
         heights = new int[16][16];
@@ -108,13 +119,19 @@ public class ElevationManager {
         lon = coord1[0];
         lat = coord1[1];
 
+        //Stores whether height data was located for each block and what zoom level it current is at
+        int[] iHeightGot = {0};
+
         //Iterate over each block in the chunk and increment the lon/lat accordingly.
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j<16; j++) {
+                iHeightGot[0] = 0;
                 for (ElevationTile elevationTile : usedTiles) {
-                    if (heights[i][j] == 0) {
-                        heights[i][j] = elevationTile.getHeight(lon, lat);
+                    if (/*heights[i][j] == 0 || */iHeightGot[0]!=15) { //If zoom level is not 15, keep going through the tiles to get a better one
+                        heights[i][j] = elevationTile.getHeight(lon, lat, iHeightGot);
                     }
+                    if (iHeightGot[0] == 0) //If data was not obtained from any of the tiles
+                        heights[i][j] = -30;
                 }
                 lon += steplon;
                 lat += steplat;
