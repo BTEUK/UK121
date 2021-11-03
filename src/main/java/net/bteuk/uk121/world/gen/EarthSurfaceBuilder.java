@@ -1,4 +1,4 @@
-package net.bteuk.uk121.world.gen.surfacebuilder;
+package net.bteuk.uk121.world.gen;
 
 import com.mojang.serialization.Codec;
 import net.bteuk.uk121.Config;

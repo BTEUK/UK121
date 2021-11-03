@@ -5,9 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.bteuk.uk121.Config;
 import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
+import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.bteuk.uk121.world.gen.elevation.ElevationManager;
-import net.bteuk.uk121.world.gen.surfacebuilder.BlockAPICall;
-import net.bteuk.uk121.world.gen.surfacebuilder.EarthSurfaceBuilder;
+import net.bteuk.uk121.world.gen.surfacedecoration.BoundingBox;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -28,8 +28,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class EarthGenerator extends ChunkGenerator {
+
+    public ModifiedAirocean projection;
 
     protected final Random random;
     protected final BlockState grassBlock;
@@ -68,8 +71,9 @@ public class EarthGenerator extends ChunkGenerator {
         this.populationSource = populationSource;
         this.biomeSource = biomeSource;
 
-        elevationManager = new ElevationManager();
+        this.projection = new ModifiedAirocean();
 
+        elevationManager = new ElevationManager(projection);
 
         Config config = new Config();
         config.load();
@@ -92,7 +96,7 @@ public class EarthGenerator extends ChunkGenerator {
     }
 
     @Override
-    public void buildSurface(ChunkRegion region, Chunk chunk) {
+    public void buildSurface(ChunkRegion region, Chunk chunk){
 
         //Get the location of the chunk
         ChunkPos chunkPos = chunk.getPos();
@@ -119,7 +123,7 @@ public class EarthGenerator extends ChunkGenerator {
         EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
 
         //Used to store the height value fetched from the API call
-        int iHeight = 0;
+        int iNullIslandHeight = 0;
 
         if (isNullIsland(cx, cz)) {
             //For each x of chunk
@@ -134,12 +138,21 @@ public class EarthGenerator extends ChunkGenerator {
 
 
                     //Generate a block at x,z with the correct height fetched from the api call.
-                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iNullIslandHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
                 }
             }
 
             return;
         }
+
+        double[] corner1 = projection.toGeo(x0,z0);
+        double[] corner2 = projection.toGeo(x1,z1);
+
+        //xMin, zMin, zMax, zMax
+        double[] geoCords = {Math.min(corner1[0], corner2[0]), Math.min(corner1[1], corner2[1]), Math.max(corner1[0], corner2[0]), Math.max(corner1[1], corner2[1])};
+
+        BoundingBox bb = new BoundingBox(geoCords);
+        ChunkPos[] positions = bb.toTiles(64);
 
         heights = elevationManager.getHeights(x0, x1, z0, z1);
 
@@ -154,6 +167,8 @@ public class EarthGenerator extends ChunkGenerator {
                 z = z0 + j;
 
                 //Generate a block at x,z with the correct height fetched from the api call.
+
+
 
                 if (heights[i][j] == -30) //Default value
                 {

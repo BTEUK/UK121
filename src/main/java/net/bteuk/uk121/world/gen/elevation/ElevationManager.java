@@ -22,10 +22,10 @@ public class ElevationManager {
 
     int[][] heights;
 
-    public ElevationManager() {
+    public ElevationManager(ModifiedAirocean projection) {
 
         tiles = new ArrayList<>();
-        projection = new ModifiedAirocean();
+        this.projection = projection;
         usedTiles = new HashSet<>();
 
     }
