@@ -1,6 +1,5 @@
-package net.bteuk.uk121.world.gen.surfacedecoration;
+package net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld;
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
 
 import java.io.*;
 import java.net.URL;
@@ -9,6 +8,8 @@ import java.nio.charset.Charset;
 public class JsonAPI
 {
     String jsonText;
+    String[] jsonNodes;
+
     Gson gson = new Gson();
     int x, z;
     protected String szURL;
@@ -17,8 +18,6 @@ public class JsonAPI
     {
         Tile test = new Tile(3286, 92);
         test.getInfo();
-        System.out.println(test.info.type);
-        System.out.println(test.info.location);
     }
 
     //For use if only the tile numbers are known upon creating the object
@@ -34,29 +33,39 @@ public class JsonAPI
         this.szURL = url;
     }
 
-    protected void downloadFile()
+    protected boolean downloadFile()
     {
         BufferedReader bufferedReader;
         InputStream is = null;
         try
         {
             is = new URL(szURL).openStream();
+            if (is == null)
+            {
+                System.out.println("Null tile");
+                return false;
+            }
             bufferedReader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
             jsonText = readAll(bufferedReader);
+            jsonText = jsonText.trim();
+            jsonNodes = jsonText.split("\n");
+            return true;
         }
         catch (IOException e)
         {
-
+            System.out.println(e.getMessage());
+            return false;
         }
         finally
         {
             try
             {
-                is.close();
+                if (is != null)
+                    is.close();
             }
             catch (IOException e)
             {
-
+                return false;
             }
         }
     }

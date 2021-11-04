@@ -32,10 +32,16 @@ public class BlockAPICall {
     private BufferedImage pngTile;
     public int[][] iHeights = new int[16][16];
 
-    public static String directory = UK121.directory + "Elevation/";
+//    public static String directory = UK121.directory + "Elevation/";
 
     private boolean bFileRead = true;
 
+    public static void main(String[] args)
+    {
+        zoom = 64;
+        int[] tile = getTile3(51.3591278, 1.4448357, 0);
+        System.out.println(tile[0] +", "+tile[1]);
+    }
     public BlockAPICall(int xTile, int yTile, int zoom, int x0, int z0)
     {
         this.zoom = zoom;
@@ -127,7 +133,7 @@ public class BlockAPICall {
             return 0;
 
         //Calculates the tile
-        getTile(dLatitude, dLongitude, zoom);
+        getTile3(dLatitude, dLongitude, zoom);
 
         //Checks whether there is Lidar available, then cache and if it isn't in lidar or cache, source is set to the AWS API
         ElevationSource source = determineSource();
@@ -144,7 +150,7 @@ public class BlockAPICall {
             APIService.downloadImage(URL, xTile, yTile, zoom);
         }
 
-        fileName = directory + zoom +"-" +xTile +"-" +yTile +".png";
+      //  fileName = directory + zoom +"-" +xTile +"-" +yTile +".png";
         File file = new File(fileName);
 
         //Find the block represented by the top left and bottom right corners
@@ -199,7 +205,7 @@ public class BlockAPICall {
     }
 
     public static ElevationSource determineSource() {
-        File file = new File(directory + zoom +"-" + xTile + "-" + yTile + ".png");
+  //      File file = new File(directory + zoom +"-" + xTile + "-" + yTile + ".png");
         if (file.exists())
             return ElevationSource.Cache;
 
@@ -207,7 +213,7 @@ public class BlockAPICall {
         return ElevationSource.AWS_Terrain;
     }
 
-    private static int[] getTile(final double lat, final double lon, final int zoom) {
+    private static int[] getTile3(final double lat, final double lon, final int zoom) {
         int xtile = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
         int ytile = (int) Math.floor((1 - Math.log(Math.tan(Math.toRadians(lat)) + 1 / Math.cos(Math.toRadians(lat))) / Math.PI) / 2 * (1 << zoom));
         if (xtile < 0)
@@ -229,7 +235,7 @@ public class BlockAPICall {
     public static int[] getTile(double x, double y)
     {
         double[] longLat = convertMCCordsToLongLat(x, y);
-        int[] Tile = getTile(longLat[1], longLat[0], zoom);
+        int[] Tile = getTile3(longLat[1], longLat[0], zoom);
         return Tile;
     }
 

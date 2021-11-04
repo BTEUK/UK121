@@ -8,7 +8,7 @@ import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.bteuk.uk121.world.gen.elevation.ElevationManager;
 import net.bteuk.uk121.world.gen.surfacedecoration.BoundingBox;
-import net.bteuk.uk121.world.gen.surfacedecoration.Tile;
+import net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld.Tile;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -158,8 +158,10 @@ public class EarthGenerator extends ChunkGenerator {
 
         for (int i = 0 ; i < positions.length ; i++)
         {
+            System.out.println();
             tiles[i] = new Tile(positions[i].x, positions[i].z);
-            tiles[i].getInfo();
+            System.out.println(positions[i].x +"/"+positions[i].z);
+       //     tiles[i].getInfo();
         }
 
         heights = elevationManager.getHeights(x0, x1, z0, z1);

@@ -1,5 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacedecoration;
 
+import lombok.NonNull;
 import net.minecraft.util.math.ChunkPos;
 import com.google.gson.*;
 
@@ -7,6 +8,32 @@ public class BoundingBox
 {
     double minX, maxX, minZ, maxZ;
     int size = 64;
+
+    public BoundingBox(double min, double max, double min1, double max1)
+    {
+        this.minX = min;
+        this.maxX = max;
+        this.minZ = min1;
+        this.maxZ = max1;
+    }
+
+    //Getters
+    public double minX()
+    {
+        return minX;
+    }
+    public double minZ()
+    {
+        return minZ;
+    }
+    public double maxX()
+    {
+        return maxX;
+    }
+    public double maxZ()
+    {
+        return maxZ;
+    }
 
     public static void main (String[] args) {
         double[] degrees = {51.354565, 1.430773, 51.354565, 1.430773};
@@ -57,5 +84,18 @@ public class BoundingBox
     public static int ceilI(double d) {
         int i = (int) d;
         return d < i ? i : i + 1;
+    }
+
+    public static BoundingBox of(double x0, double x1, double z0, double z1) {
+        return new BoundingBox(Math.min(x0, x1), Math.max(x0, x1), Math.min(z0, z1), Math.max(z0, z1));
+    }
+    /**
+     * Returns a bounding box that contains this bounding box and the given one.
+     *
+     * @param other the other bounding box
+     * @return the minimum bounding box containing both bounding boxes
+     */
+    public BoundingBox union(@NonNull BoundingBox other) {
+        return of(Math.max(this.minX(), other.minX()), Math.max(this.maxX(), other.maxX()), Math.min(this.minZ(), other.minZ()), Math.max(this.maxZ(), other.maxZ()));
     }
 }
