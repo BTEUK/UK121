@@ -8,21 +8,30 @@ import java.nio.charset.Charset;
 
 public class JsonAPI
 {
-    String szURL;
     String jsonText;
     Gson gson = new Gson();
+    int x, z;
+    protected String szURL;
 
     public static void main(String[] args)
     {
-        Tile test = new Tile("https://cloud.daporkchop.net/gis/osm/0/tile/3286/92.json");
+        Tile test = new Tile(3286, 92);
         test.getInfo();
         System.out.println(test.info.type);
         System.out.println(test.info.location);
     }
 
+    //For use if only the tile numbers are known upon creating the object
+    public JsonAPI(int x, int z)
+    {
+        this.x = x;
+        this.z = z;
+    }
+
+    //For use if the url is already known upon creating the object
     public JsonAPI(String url)
     {
-        szURL = url;
+        this.szURL = url;
     }
 
     protected void downloadFile()

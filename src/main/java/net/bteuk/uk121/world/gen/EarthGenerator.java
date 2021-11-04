@@ -8,6 +8,7 @@ import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.bteuk.uk121.world.gen.elevation.ElevationManager;
 import net.bteuk.uk121.world.gen.surfacedecoration.BoundingBox;
+import net.bteuk.uk121.world.gen.surfacedecoration.Tile;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -153,6 +154,13 @@ public class EarthGenerator extends ChunkGenerator {
 
         BoundingBox bb = new BoundingBox(geoCords);
         ChunkPos[] positions = bb.toTiles(64);
+        Tile[] tiles = new Tile[positions.length];
+
+        for (int i = 0 ; i < positions.length ; i++)
+        {
+            tiles[i] = new Tile(positions[i].x, positions[i].z);
+            tiles[i].getInfo();
+        }
 
         heights = elevationManager.getHeights(x0, x1, z0, z1);
 
@@ -167,8 +175,6 @@ public class EarthGenerator extends ChunkGenerator {
                 z = z0 + j;
 
                 //Generate a block at x,z with the correct height fetched from the api call.
-
-
 
                 if (heights[i][j] == -30) //Default value
                 {
