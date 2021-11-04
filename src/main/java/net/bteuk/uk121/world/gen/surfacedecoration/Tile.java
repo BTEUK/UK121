@@ -1,6 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacedecoration;
 
-public class Tile extends JSONAPI {
+public class Tile extends JsonAPI {
     public TileInfo info;
 
     public Tile(String url) {

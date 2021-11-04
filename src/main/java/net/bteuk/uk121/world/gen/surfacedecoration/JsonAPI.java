@@ -6,7 +6,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-public class JSONAPI
+public class JsonAPI
 {
     String szURL;
     String jsonText;
@@ -20,7 +20,7 @@ public class JSONAPI
         System.out.println(test.info.location);
     }
 
-    public JSONAPI(String url)
+    public JsonAPI(String url)
     {
         szURL = url;
     }

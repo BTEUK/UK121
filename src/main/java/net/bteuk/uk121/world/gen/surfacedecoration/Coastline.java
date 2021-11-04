@@ -1,6 +1,6 @@
 package net.bteuk.uk121.world.gen.surfacedecoration;
 
-public class Coastline extends JSONAPI
+public class Coastline extends JsonAPI
 {
     CoastlineInfo info;
 
