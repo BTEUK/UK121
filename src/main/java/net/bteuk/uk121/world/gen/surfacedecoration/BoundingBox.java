@@ -1,6 +1,5 @@
 package net.bteuk.uk121.world.gen.surfacedecoration;
 
-import lombok.NonNull;
 import net.minecraft.util.math.ChunkPos;
 import com.google.gson.*;
 
@@ -95,7 +94,7 @@ public class BoundingBox
      * @param other the other bounding box
      * @return the minimum bounding box containing both bounding boxes
      */
-    public BoundingBox union(@NonNull BoundingBox other) {
+    public BoundingBox union(BoundingBox other) {
         return of(Math.max(this.minX(), other.minX()), Math.max(this.maxX(), other.maxX()), Math.min(this.minZ(), other.minZ()), Math.max(this.maxZ(), other.maxZ()));
     }
 }
