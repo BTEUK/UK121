@@ -1,9 +1,9 @@
 package net.bteuk.uk121.world.gen.surfacedecoration.overpassapi;
 
-public class Node extends Object
+public class Node// extends Object
 {
-    long ref;
-    double latitude, longitude;
+    public long ref;
+    public double latitude, longitude;
 
     public Node(long ref, double lat, double lLong)
     {
