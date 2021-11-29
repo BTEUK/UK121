@@ -1,21 +1,14 @@
 package net.bteuk.uk121;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.buildtheearth.terraplusplus.dataset.osm.BlockStateParser;
-import net.buildtheearth.terraplusplus.util.BiomeDeserializeMixin;
-import net.buildtheearth.terraplusplus.util.BlockStateDeserializeMixin;
+import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.minecraft.block.BlockState;
-import net.minecraft.world.biome.Biome;
 
 public class TerraConstants {
+    public static final ModifiedAirocean projection = new ModifiedAirocean();
 
-    public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(BlockState.class, BlockStateParser.INSTANCE)
-            .create();
+    public static final Gson GSON = new Gson();
 
 /*    public static final JsonMapper JSON_MAPPER = JsonMapper.builder()
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
