@@ -164,7 +164,9 @@ public class EarthGenerator extends ChunkGenerator {
         UseType[][] grid;
 
         //If the chunk is not part of the projection, fill it with water
-        if (Double.isNaN(corner1[0]))
+        boolean bVoid = Double.isNaN(corner1[0]);
+        bVoid = true; //TESTING
+        if (bVoid)
         {
             BlockUse BU = new BlockUse();
             grid = BU.getGrid();
