@@ -164,11 +164,17 @@ public class EarthGenerator extends ChunkGenerator {
         UseType[][] grid;
 
         //If the chunk is not part of the projection, fill it with water
-        boolean bVoid = Double.isNaN(corner1[0]);
-        bVoid = true; //TESTING
+
+        boolean bVoid = true; //TESTING
+
         if (bVoid)
         {
-            BlockUse BU = new BlockUse();
+            BlockUse BU = new BlockUse(UseType.Land);
+            grid = BU.getGrid();
+        }
+        else if (Double.isNaN(corner1[0]))
+        {
+            BlockUse BU = new BlockUse(UseType.Water);
             grid = BU.getGrid();
         }
         else
@@ -176,7 +182,7 @@ public class EarthGenerator extends ChunkGenerator {
             double[] corner2 = projection.toGeo(x1,z1);
             if (Double.isNaN(corner2[0]))
             {
-                BlockUse BU = new BlockUse();
+                BlockUse BU = new BlockUse(UseType.Water);
                 grid = BU.getGrid();
             }
             else
