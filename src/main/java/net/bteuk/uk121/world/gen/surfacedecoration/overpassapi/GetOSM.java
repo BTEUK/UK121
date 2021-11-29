@@ -52,12 +52,13 @@ public class GetOSM extends DefaultHandler
 			xmlReader.setErrorHandler(new MyErrorHandler(System.err));
 
 			xmlReader.setContentHandler((ContentHandler) new GetOSM(bbox));
-			String URL = "https://overpass.kumi.systems/api/interpreter?data=%5Btimeout%3A1%5D%3B%0A%28" +
+			String URL = "https://overpass.kumi.systems/api/interpreter?data=%5Btimeout%3A5%5D%3B%0A%28" +
 					"%0A%20%20nwr%5Bbuilding%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
 					bbox.maxX() +"%2C"+bbox.maxZ()+"%29%3B%0A%20%20nwr%5Bhighway%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
 					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
 					"%0A%29%3B" +
 					"%0Aout%20geom%3B";
+		//	System.out.println(URL);
 			xmlReader.parse(URL);
 
 			//Adds all of the ways to the object array
