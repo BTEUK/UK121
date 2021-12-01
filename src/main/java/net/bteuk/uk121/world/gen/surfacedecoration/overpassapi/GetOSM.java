@@ -2,7 +2,6 @@ package net.bteuk.uk121.world.gen.surfacedecoration.overpassapi;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.security.interfaces.DSAPublicKey;
 import java.util.ArrayList;
 
 import javax.xml.parsers.SAXParser;
@@ -58,7 +57,7 @@ public class GetOSM extends DefaultHandler
 					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
 					"%0A%29%3B" +
 					"%0Aout%20geom%3B";
-		//	System.out.println(URL);
+			System.out.println(URL);
 			xmlReader.parse(URL);
 
 			//Adds all of the ways to the object array
