@@ -1,8 +1,10 @@
 package net.bteuk.uk121.world.gen.surfacedecoration.overpassapi;
 
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Scanner;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -25,6 +27,8 @@ public class GetOSM extends DefaultHandler
 	private static ArrayList<Way> ways;
 	private static ArrayList<Node> nds = new ArrayList<Node>();
 
+	public static String directory = UK121.directory + "Ways/";
+
 	String[] DataReturned;
 	
 	boolean testValueVaryWeather = true;
@@ -37,6 +41,108 @@ public class GetOSM extends DefaultHandler
 	public GetOSM(BoundingBox bbox)
 	{
 		this.bbox = bbox;
+	}
+
+	public static ArrayList<Way> loadTiles(BoundingBox bbox)
+	{
+		Calendar cal = Calendar.getInstance();
+		Date time = cal.getTime();
+		long lTime1 = time.getTime();
+
+		ways = new ArrayList<Way>();
+		try
+		{
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			spf.setNamespaceAware(true);
+			SAXParser saxParser = spf.newSAXParser();
+			XMLReader xmlReader = saxParser.getXMLReader();
+			xmlReader.setErrorHandler(new MyErrorHandler(System.err));
+
+			xmlReader.setContentHandler((ContentHandler) new GetOSM(bbox));
+			String URL = "https://overpass.kumi.systems/api/interpreter?data=%5Btimeout%3A5%5D%3B%0A%28" +
+					"%0A%20%20nwr%5Bbuilding%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
+					bbox.maxX() +"%2C"+bbox.maxZ()+"%29%3B%0A%20%20nwr%5Bhighway%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
+					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
+					"%0A%29%3B" +
+					"%0Aout%20ids%3B";
+			System.out.println(URL);
+			xmlReader.parse(URL);
+
+			cal = Calendar.getInstance();
+			time = cal.getTime();
+			long lTime2 = time.getTime();
+
+			System.out.println("IDs api call: " +(lTime2-lTime1) +"ms");
+
+			File file;
+			Scanner infile;
+			String szInLine;
+			String[] coords;
+			Node node;
+			boolean bAPI = false;
+
+			//Goes through all of the ways
+			for (int i = 0 ; i < ways.size() && bAPI == false; i++)
+			{
+				try
+				{
+					file = new File(directory+ways.get(i).id+".txt");
+					if (file.exists())
+					{
+						infile = new Scanner(file);
+						//Skips the header row
+						szInLine = infile.nextLine();
+
+						//Finds out how many schools there are
+						while (infile.hasNext())
+						{
+							szInLine = infile.nextLine();
+							coords = szInLine.split(",");
+							node = new Node(Long.parseLong(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]));
+						}
+						infile.close();
+					}
+					else
+					{
+						System.out.println("Initiating API fetch:");
+
+						cal = Calendar.getInstance();
+						time = cal.getTime();
+						lTime1 = time.getTime();
+
+						ways = entry(bbox);
+
+						cal = Calendar.getInstance();
+						time = cal.getTime();
+						lTime2 = time.getTime();
+
+						System.out.println("Fetching ALL data from the API: " +(lTime2-lTime1) +"ms");
+
+						bAPI = true;
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		catch (SAXException e)
+		{
+			UK121.LOGGER.error("SAX Exception error OSM data: \n"+e.getMessage());
+			//	e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			UK121.LOGGER.error("IO Exception error OSM data \n"+e.getMessage());
+			//	e.printStackTrace();
+		}
+		catch (Exception e)
+		{
+			UK121.LOGGER.error("Exception error OSM data");
+			e.printStackTrace();
+		}
+		return ways;
 	}
 
 	public static ArrayList<Way> entry(BoundingBox bbox)
@@ -60,11 +166,47 @@ public class GetOSM extends DefaultHandler
 			System.out.println(URL);
 			xmlReader.parse(URL);
 
-			//Adds all of the ways to the object array
-		//	for (int i = 0 ; i < ways.size() ; i++)
-		//	{
-			//	objects.add(ways.get(i));
-		//	}
+			File file;
+			Scanner infile;
+			String szInLine;
+			Node node;
+
+			FileWriter fw;
+			BufferedWriter bw;
+
+			//Adds ways to cache
+			for (int i = 0 ; i < ways.size() ; i++)
+			{
+				try
+				{
+					file = new File(directory+ways.get(i).id+".txt");
+					if (file.exists())
+					{
+					}
+					else
+					{
+						//Creates directory and file
+						file.getParentFile().mkdirs();
+						file.createNewFile();
+
+						fw = new FileWriter(directory+ways.get(i).id+".txt", true);
+						bw = new BufferedWriter(fw);
+						bw.write(ways.get(i).id+"\n");
+						for (int j = 0 ; j < ways.get(i).nodes.size() ; j++)
+						{
+							szInLine = ""+ways.get(i).nodes.get(j).ref+","
+									+ways.get(i).nodes.get(j).latitude+","
+									+ways.get(i).nodes.get(j).longitude;
+							bw.write(szInLine+"\n");
+						}
+						bw.close();
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		catch (SAXException e)
 		{
