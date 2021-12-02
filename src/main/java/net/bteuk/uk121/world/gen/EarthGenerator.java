@@ -192,16 +192,16 @@ public class EarthGenerator extends ChunkGenerator {
 
                 //Multiply the bbox by 3 on both sides
                 double xRange = geoCords[2]-geoCords[0];
-                geoCords[0] = geoCords[0] - xRange;
-                geoCords[2] = geoCords[2] + xRange;
+                geoCords[0] = geoCords[0] - Math.abs(xRange);
+                geoCords[2] = geoCords[2] + Math.abs(xRange);
 
                 double zRange = geoCords[3]-geoCords[1];
-                geoCords[1] = geoCords[1] - zRange;
-                geoCords[3] = geoCords[3] + zRange;
+                geoCords[1] = geoCords[1] - Math.abs(zRange);
+                geoCords[3] = geoCords[3] + Math.abs(zRange);
 
                 //Creates bounding box for use by the osm fetcher
                 BoundingBox bb = new BoundingBox(geoCords);
-                BlockUse BU = new BlockUse(bb, new int[]{x0, z0}, projection);
+                BlockUse BU = new BlockUse(bb, new int[]{x0-16, z0-16}, projection);
                 BU.fillGrid();
                 grid = BU.getGrid();
             }
