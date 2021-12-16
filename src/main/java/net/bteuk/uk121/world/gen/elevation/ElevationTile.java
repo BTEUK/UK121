@@ -1,25 +1,23 @@
 package net.bteuk.uk121.world.gen.elevation;
 
-import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.surfacebuilder.APIService;
 
 import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import static java.lang.Math.*;
 
 public class ElevationTile {
 
     public String name;
 
+    public int tileX, tileZ;
+
     public double[] coordMin, coordMax;
     public boolean accessed;
 
-    private double lonRange;
-    private double latRange;
+    public double lonRange;
+    public double latRange;
 
     private int pixel1;
     private int pixel2;
@@ -32,6 +30,9 @@ public class ElevationTile {
 
     public ElevationTile(String name, int x, int y, int zoom) {
         this.name = name;
+
+        this.tileX = x;
+        this.tileZ = y;
 
         this.zoom = zoom;
 
@@ -70,7 +71,7 @@ public class ElevationTile {
     }
 
     //Get the height at a given coordinate.
-    public int getHeight(double lon, double lat, int[] iHeightGot) {
+    public double getHeight(double lon, double lat) {
 
         pixel1 = (int) (((lon-coordMin[0]) / lonRange) * 256);
         pixel2 = (int) (((coordMax[1]-lat) / latRange) * 256);
@@ -79,12 +80,39 @@ public class ElevationTile {
             return 0;
         }
 
+        return getHeight(pixel1, pixel2);
+    }
+
+    //Gets the pixel at the given coordinate.
+    public int[] getPixel(double lon, double lat) {
+        pixel1 = (int) (((lon-coordMin[0]) / lonRange) * 256);
+        pixel2 = (int) (((coordMax[1]-lat) / latRange) * 256);
+
+        if (pixel1 > 255 || pixel2 > 255 || pixel1 < 0 || pixel2 < 0) {
+            return null;
+        } else {
+            return new int[]{pixel1,pixel2};
+        }
+    }
+
+    //Get longitude at a specific pixel.
+    public double getLon(double pixelX) {
+        return pixelX/256*lonRange + coordMin[0];
+    }
+
+    //Get latitude at a specific pixel.
+    public double getLat(double pixelZ) {
+        return coordMax[1] - pixelZ/256*latRange;
+    }
+
+    //Get the height at a given pixel.
+    public double getHeight(int pixelX, int pixelZ) {
+
         try {
-            int rgb = pngTile.getRGB(pixel1, pixel2);
-            int r = (rgb >> 16) & 0xff;
-            int g = (rgb >> 8) & 0xff;
-            int b = rgb & 0xff;
-            iHeightGot[0] = this.zoom;
+            int rgb = pngTile.getRGB(pixelX, pixelZ);
+            double r = (rgb >> 16) & 0xff;
+            double g = (rgb >> 8) & 0xff;
+            double b = rgb & 0xff;
             return ((r * 256 + g + b / 256) - 32768);
         }
         catch (Exception e)
