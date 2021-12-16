@@ -12,6 +12,7 @@ import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Object;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 
 public class BlockUse
 {
@@ -124,22 +125,41 @@ public class BlockUse
                 //Stores the block coordinates of each of the nodes
                 int[][] iNodeBlocks = new int[nodes.size()][2];
                 int iCount = 0;
+
+                //Goes through each node and adds it to the node blocks array
                 for (Node node : nodes)
                 {
                     double[] coords = projection.fromGeo(node.longitude, node.latitude);
 
                     iNodeBlocks[iCount][0] = (int) Math.round(coords[0] - blockMins[0]);
                     iNodeBlocks[iCount][1] = (int) Math.round(coords[1] - blockMins[1]);
-              //      System.out.println("The blocks of the downloaded node:");
-              //      System.out.println(iNodeBlocks[iCount][0]);
-             //       System.out.println(iNodeBlocks[iCount][1]);
+                    //      System.out.println("The blocks of the downloaded node:");
+                    //      System.out.println(iNodeBlocks[iCount][0]);
+                    //       System.out.println(iNodeBlocks[iCount][1]);
                     iCount++;
                 }
 
                 //Go through each node
-                for (int j = 0 ; j < iCount - 1 ; j++)
+             /*   for (int j = 0 ; j < iCount - 1 ; j++)
                 {
                     nextNode(iNodeBlocks, j, iCount, 0, 0, useType);
+                }
+              */
+                //Go through each node
+                Line line = new Line();
+                for (int j = 1 ; j < iCount ; j++)
+                {
+                    ArrayList<BlockVector3> vset =  line.drawLine(iNodeBlocks[j - 1][0], iNodeBlocks[j - 1][1], iNodeBlocks[j][0], iNodeBlocks[j][1]);
+                    for (int k = 0 ; k < vset.size() ; k++)
+                    {
+                        int iBestBlockX = vset.get(k).getBlockX();
+                        int iBestBlockZ = vset.get(k).getBlockZ();
+
+                        if (iBestBlockX >= 0 && iBestBlockX < 48 && iBestBlockZ>= 0 && iBestBlockZ < 48)
+                        {
+                            grid[iBestBlockX][iBestBlockZ] = useType;
+                        }
+                    }
                 }
             }
         }
@@ -149,12 +169,6 @@ public class BlockUse
 
     private void nextNode(int[][] iNodeBlocks, int j, int iCount, int xOffset, int zOffset, UseType useType)
     {
-     /*   //The last node
-        if (j + 1 >= iCount)
-        {
-            return;
-        }
-      */
         int iDistanceToNext;
         int iXComp, iZComp;
 

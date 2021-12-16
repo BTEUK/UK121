@@ -165,7 +165,7 @@ public class EarthGenerator extends ChunkGenerator {
 
         //If the chunk is not part of the projection, fill it with water
 
-        boolean bVoid = true; //TESTING
+        boolean bVoid = false; //TESTING
 
         if (bVoid)
         {
