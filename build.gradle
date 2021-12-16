@@ -25,6 +25,7 @@ dependencies {
     implementation 'junit:junit:4.13.2'
 	implementation 'junit:junit:4.13.2'
 	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	implementation(files('libs/flanagan.jar'))
 
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
