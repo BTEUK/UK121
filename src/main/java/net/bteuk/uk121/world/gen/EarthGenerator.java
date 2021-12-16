@@ -7,8 +7,10 @@ import net.bteuk.uk121.ConfigVariables;
 import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.bteuk.uk121.world.gen.elevation.ElevationManager;
+import net.bteuk.uk121.world.gen.surfacedecoration.BlockUse;
 import net.bteuk.uk121.world.gen.surfacedecoration.BoundingBox;
-import net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld.Tile;
+//import net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld.Tile;
+import net.bteuk.uk121.world.gen.surfacedecoration.UseType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -39,7 +41,9 @@ public class EarthGenerator extends ChunkGenerator {
     protected final BlockState grassBlock;
     protected final BlockState dirtBlock;
     protected final BlockState stoneBlock;
+    protected final BlockState roadBlock;
     protected final BlockState defaultFluid;
+    protected final BlockState buildingBlock;
 
     //Structure config values
     private static final int iDistance = 0;
@@ -63,10 +67,14 @@ public class EarthGenerator extends ChunkGenerator {
         super(populationSource, biomeSource, new StructuresConfig(Optional.of(StrongholdConfigSetup()), new HashMap<>()), 0);
         //Random based on world seed. Not really applicable to this world type but added nontheless.
         random = new ChunkRandom(0);
-        //Set the 3 default blocks.
+
+        //Set the 4 default blocks.
         grassBlock = Blocks.GRASS_BLOCK.getDefaultState();
         dirtBlock = Blocks.DIRT.getDefaultState();
         stoneBlock = Blocks.STONE.getDefaultState();
+        roadBlock = Blocks.GRAY_WOOL.getDefaultState();
+        buildingBlock = Blocks.IRON_BLOCK.getDefaultState();
+
         //Default fluid set to water.
         defaultFluid = Blocks.WATER.getDefaultState();
         this.populationSource = populationSource;
@@ -115,13 +123,19 @@ public class EarthGenerator extends ChunkGenerator {
         int z;
 
         //Basic surface config, to be edited later.
-        TernarySurfaceConfig config = new TernarySurfaceConfig(grassBlock, dirtBlock, stoneBlock);
+        TernarySurfaceConfig land = new TernarySurfaceConfig(grassBlock, dirtBlock, stoneBlock);
 
         //Seabed surface
         TernarySurfaceConfig seabed = new TernarySurfaceConfig(dirtBlock, dirtBlock, stoneBlock);
 
+        //Road surface
+        TernarySurfaceConfig road = new TernarySurfaceConfig(roadBlock, dirtBlock, stoneBlock);
+
+        //Building surface
+        TernarySurfaceConfig building = new TernarySurfaceConfig(buildingBlock, dirtBlock, stoneBlock);
+
         //Create surfaceBuilder, which is where the blocks are actually generated.
-        EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(config.CODEC);
+        EarthSurfaceBuilder surfaceBuilder = new EarthSurfaceBuilder(land.CODEC);
 
         //Used to store the height value fetched from the API call
         int iNullIslandHeight = 0;
@@ -137,9 +151,8 @@ public class EarthGenerator extends ChunkGenerator {
                     //Updates the actual z coordinate
                     z = z0 + j;
 
-
                     //Generate a block at x,z with the correct height fetched from the api call.
-                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iNullIslandHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iNullIslandHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, land);
                 }
             }
 
@@ -147,23 +160,63 @@ public class EarthGenerator extends ChunkGenerator {
         }
 
         double[] corner1 = projection.toGeo(x0,z0);
-        double[] corner2 = projection.toGeo(x1,z1);
 
-        //xMin, zMin, zMax, zMax
-        double[] geoCords = {Math.min(corner1[0], corner2[0]), Math.min(corner1[1], corner2[1]), Math.max(corner1[0], corner2[0]), Math.max(corner1[1], corner2[1])};
+        UseType[][] grid;
 
-        BoundingBox bb = new BoundingBox(geoCords);
-        ChunkPos[] positions = bb.toTiles(64);
-        Tile[] tiles = new Tile[positions.length];
+        //If the chunk is not part of the projection, fill it with water
 
-        for (int i = 0 ; i < positions.length ; i++)
+        boolean bVoid = true; //TESTING
+
+        if (bVoid)
+        {
+            BlockUse BU = new BlockUse(UseType.Land);
+            grid = BU.getGrid();
+        }
+        else if (Double.isNaN(corner1[0]))
+        {
+            BlockUse BU = new BlockUse(UseType.Water);
+            grid = BU.getGrid();
+        }
+        else
+        {
+            double[] corner2 = projection.toGeo(x1,z1);
+            if (Double.isNaN(corner2[0]))
+            {
+                BlockUse BU = new BlockUse(UseType.Water);
+                grid = BU.getGrid();
+            }
+            else
+            {
+                //xMin, zMin, zMax, zMax
+                double[] geoCords = {Math.min(corner1[1], corner2[1]), Math.min(corner1[0], corner2[0]), Math.max(corner1[1], corner2[1]), Math.max(corner1[0], corner2[0])};
+
+                //Multiply the bbox by 3 on both sides
+                double xRange = geoCords[2]-geoCords[0];
+                geoCords[0] = geoCords[0] - Math.abs(xRange);
+                geoCords[2] = geoCords[2] + Math.abs(xRange);
+
+                double zRange = geoCords[3]-geoCords[1];
+                geoCords[1] = geoCords[1] - Math.abs(zRange);
+                geoCords[3] = geoCords[3] + Math.abs(zRange);
+
+                //Creates bounding box for use by the osm fetcher
+                BoundingBox bb = new BoundingBox(geoCords);
+                BlockUse BU = new BlockUse(bb, new int[]{x0-16, z0-16}, projection);
+                BU.fillGrid();
+                grid = BU.getGrid();
+            }
+        }
+
+        //  Tile[] tiles = new Tile[positions.length];
+
+    /*    for (int i = 0 ; i < positions.length ; i++)
         {
             System.out.println();
-            tiles[i] = new Tile(positions[i].x, positions[i].z);
+          //  tiles[i] = new Tile(positions[i].x, positions[i].z);
             System.out.println(positions[i].x +"/"+positions[i].z);
        //     tiles[i].getInfo();
         }
-
+*/
         heights = elevationManager.getHeights(x0, x1, z0, z1);
 
         //For each x of chunk
@@ -181,9 +234,29 @@ public class EarthGenerator extends ChunkGenerator {
                 if (heights[i][j] == -30) //Default value
                 {
                     surfaceBuilder.generateWater(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, -30, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, seabed);
+                    continue;
                 }
-                else
-                    surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, config);
+                switch (grid[i+16][j+16])
+                {
+                    case Land:
+                    case Beach:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, land);
+                        break;
+
+                    case Road:
+                    case RoadDerived:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, road);
+                        break;
+
+                    case BuildingOutline:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, building);
+                        break;
+
+                    case Water:
+                        surfaceBuilder.generateWater(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, seabed);
+                        break;
+                }
+
             }
         }
 
