@@ -45,7 +45,7 @@ public class BlockUse
         int[] blockMins = {0, 0};
         BlockUse BU = new BlockUse(bbox , blockMins, TerraConstants.projection);
 
-        BU.fillGrid();
+        BU.fillGrid(false);
 
      //   BU.display();
     }
@@ -74,21 +74,22 @@ public class BlockUse
         System.out.println("------------------------------------------------");
     }
 
-    public void fillGrid()
+    public void fillGrid(boolean bAlternative)
     {
         //Returning an array list of objects wasn't working
 
-        Calendar cal = Calendar.getInstance();
-        Date time = cal.getTime();
-        long lTime1 = time.getTime();
+            Calendar cal = Calendar.getInstance();
+            Date time = cal.getTime();
+            long lTime1 = time.getTime();
 
-        ways = GetOSM.entry(bbox);
+            ways = GetOSM.entry(bbox, bAlternative);
 
-        cal = Calendar.getInstance();
-        time = cal.getTime();
-        long lTime2 = time.getTime();
+            cal = Calendar.getInstance();
+            time = cal.getTime();
+            long lTime2 = time.getTime();
 
-        System.out.println("Getting ways: " +(lTime2-lTime1) +"ms");
+            System.out.println("Getting ways: " + (lTime2 - lTime1) + "ms");
+
 
         boolean bHighway;
         int i;
@@ -255,7 +256,10 @@ public class BlockUse
                             //If a block is 4 blocks distance from a road node, set its value to road derived
                             if ((i+k)<48 && (j+l)<48 && (k*k + l*l) < 20)
                             {
-                                grid[i+k][j+l] = UseType.RoadDerived;
+                                if (grid[i+k][j+l] != UseType.Road)
+                                {
+                                    grid[i+k][j+l] = UseType.RoadDerived;
+                                }
                             }
                         }
                     }

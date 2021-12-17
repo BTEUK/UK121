@@ -110,7 +110,7 @@ public class GetOSM extends DefaultHandler
 						time = cal.getTime();
 						lTime1 = time.getTime();
 
-						ways = entry(bbox);
+						ways = entry(bbox, false);
 
 						cal = Calendar.getInstance();
 						time = cal.getTime();
@@ -145,7 +145,7 @@ public class GetOSM extends DefaultHandler
 		return ways;
 	}
 
-	public static ArrayList<Way> entry(BoundingBox bbox)
+	public static ArrayList<Way> entry(BoundingBox bbox, boolean bAlternative)
 	{
 		ways = new ArrayList<Way>();
 		try
@@ -157,8 +157,17 @@ public class GetOSM extends DefaultHandler
 			xmlReader.setErrorHandler(new MyErrorHandler(System.err));
 
 			xmlReader.setContentHandler((ContentHandler) new GetOSM(bbox));
-			String URL = "https://overpass.kumi.systems/api/interpreter?data=%5Btimeout%3A5%5D%3B%0A%28" +
-					"%0A%20%20nwr%5Bbuilding%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
+			String URL = "";
+
+			if (bAlternative)
+			{
+				URL = URL + "https://z.overpass-api.de/api/interpreter?data=%5Btimeout%3A5%5D%3B%0A%28";
+			}
+			else
+			{
+				URL = URL + "https://overpass.kumi.systems/api/interpreter?data=%5Btimeout%3A5%5D%3B%0A%28";
+			}
+			URL = URL + "%0A%20%20nwr%5Bbuilding%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
 					bbox.maxX() +"%2C"+bbox.maxZ()+"%29%3B%0A%20%20nwr%5Bhighway%5D%28" +bbox.minX()+"%2C"+bbox.minZ()+"%2C" +
 					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
 					"%0A%29%3B" +
