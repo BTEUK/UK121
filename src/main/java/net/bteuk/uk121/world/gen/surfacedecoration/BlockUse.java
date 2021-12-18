@@ -252,9 +252,9 @@ public class BlockUse
                 }
                 else if (grid[i][j].equals(UseType.Road))
                 {
-                    for (k = 0 ; k < 5 ; k++)
+                    for (k = -2 ; k < -2 ; k++)
                     {
-                        for (l = 0; l < 5 ; l++)
+                        for (l = -2; l < -2 ; l++)
                         {
                             //If a block is 4 blocks distance from a road node, set its value to road derived
                             if ((i+k)<48 && (j+l)<48 && (k*k + l*l) < 20)
