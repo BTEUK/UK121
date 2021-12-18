@@ -88,7 +88,10 @@ public class BlockUse
             time = cal.getTime();
             long lTime2 = time.getTime();
 
-            System.out.println("Getting ways: " + (lTime2 - lTime1) + "ms");
+            if (bAlternative)
+                System.out.println("Getting ways, alt api: " + (lTime2 - lTime1) + "ms");
+            else
+                System.out.println("Getting ways: " + (lTime2 - lTime1) + "ms");
 
 
         boolean bHighway;
