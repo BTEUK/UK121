@@ -172,7 +172,7 @@ public class GetOSM extends DefaultHandler
 					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
 					"%0A%29%3B" +
 					"%0Aout%20geom%3B";
-			System.out.println(URL);
+		//	System.out.println(URL);
 			xmlReader.parse(URL);
 
 			File file;
