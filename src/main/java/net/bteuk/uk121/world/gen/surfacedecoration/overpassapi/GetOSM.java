@@ -28,6 +28,7 @@ public class GetOSM extends DefaultHandler
 	private static ArrayList<Node> nds = new ArrayList<Node>();
 
 	public static String directory = UK121.directory + "Ways/";
+	private static boolean bOnWay;
 
 	String[] DataReturned;
 	
@@ -172,7 +173,7 @@ public class GetOSM extends DefaultHandler
 					bbox.maxX() +"%2C"+bbox.maxZ()+ "%29%3B" +
 					"%0A%29%3B" +
 					"%0Aout%20geom%3B";
-		//	System.out.println(URL);
+			System.out.println(URL);
 			xmlReader.parse(URL);
 
 			File file;
@@ -248,6 +249,7 @@ public class GetOSM extends DefaultHandler
 
 		int i;
 		int iAttributes = atts.getLength();
+		bOnWay = false;
 
 		//Checks the element name for way
 		if (localName.equals("way"))
@@ -262,8 +264,9 @@ public class GetOSM extends DefaultHandler
 				}
 			}
 			ways.add(way);
+			bOnWay = true;
 		}
-		else if (localName.equals("tag"))
+		else if (localName.equals("tag") && bOnWay)
 		{
 			Tag tag;
 
@@ -274,7 +277,7 @@ public class GetOSM extends DefaultHandler
 		}
 
 		//Checks the element name for nd
-		else if (localName.equals("nd"))
+		else if (localName.equals("nd") && bOnWay)
 		{
 			long lRef = 0;
 			double lat = 0;
