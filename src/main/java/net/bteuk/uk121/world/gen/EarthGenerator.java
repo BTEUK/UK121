@@ -39,8 +39,10 @@ public class EarthGenerator extends ChunkGenerator {
     protected final BlockState grassBlock;
     protected final BlockState dirtBlock;
     protected final BlockState stoneBlock;
-    protected final BlockState roadBlock;
-    protected final BlockState roadLineBlock;
+    protected final BlockState wornRoadBlock;
+    protected final BlockState normalRoadBlock;
+    protected final BlockState goodRoadBlock;
+    protected final BlockState footwayBlock;
     protected final BlockState defaultFluid;
     protected final BlockState buildingBlock;
 
@@ -60,8 +62,10 @@ public class EarthGenerator extends ChunkGenerator {
 
     TernarySurfaceConfig land;
     TernarySurfaceConfig seabed;
-    TernarySurfaceConfig road;
-    TernarySurfaceConfig roadLine;
+    TernarySurfaceConfig wornRoad;
+    TernarySurfaceConfig normalRoad;
+    TernarySurfaceConfig goodRoad;
+    TernarySurfaceConfig footway;
     TernarySurfaceConfig building;
     EarthSurfaceBuilder surfaceBuilder;
 
@@ -75,12 +79,16 @@ public class EarthGenerator extends ChunkGenerator {
         //Random based on world seed. Not really applicable to this world type but added nontheless.
         random = new ChunkRandom(0);
 
-        //Set the 4 default blocks.
+        //Set the 6 default blocks.
         grassBlock = Blocks.GRASS_BLOCK.getDefaultState();
         dirtBlock = Blocks.DIRT.getDefaultState();
         stoneBlock = Blocks.STONE.getDefaultState();
-        roadBlock = Blocks.GRAY_WOOL.getDefaultState();
-        roadLineBlock = Blocks.GRAY_CONCRETE.getDefaultState();
+
+        normalRoadBlock = Blocks.GRAY_CONCRETE_POWDER.getDefaultState();
+        wornRoadBlock = Blocks.CYAN_TERRACOTTA.getDefaultState();
+        goodRoadBlock = Blocks.GRAY_CONCRETE_POWDER.getDefaultState();
+        footwayBlock = Blocks.LIGHT_GRAY_CONCRETE_POWDER.getDefaultState();
+
         buildingBlock = Blocks.IRON_BLOCK.getDefaultState();
 
         //Default fluid set to water.
@@ -101,11 +109,17 @@ public class EarthGenerator extends ChunkGenerator {
         //Seabed surface
         seabed = new TernarySurfaceConfig(dirtBlock, dirtBlock, stoneBlock);
 
-        //Road surface
-        road = new TernarySurfaceConfig(roadBlock, dirtBlock, stoneBlock);
+        //Good road
+        goodRoad = new TernarySurfaceConfig(goodRoadBlock, dirtBlock, stoneBlock);
 
-        //Road line surface
-        roadLine = new TernarySurfaceConfig(roadLineBlock, dirtBlock, stoneBlock);
+        //Normal road
+        normalRoad = new TernarySurfaceConfig(normalRoadBlock, dirtBlock, stoneBlock);
+
+        //Worn road
+        wornRoad = new TernarySurfaceConfig(wornRoadBlock, dirtBlock, stoneBlock);
+
+        //Footway
+        footway = new TernarySurfaceConfig(footwayBlock, dirtBlock, stoneBlock);
 
         //Building surface
         building = new TernarySurfaceConfig(buildingBlock, dirtBlock, stoneBlock);
@@ -153,7 +167,8 @@ public class EarthGenerator extends ChunkGenerator {
 
         if (isNullIsland(cx, cz)) {
             //For each x of chunk
-            for (int i = 0; i < 16; i++) {
+            for (int i = 0; i < 16; i++)
+            {
                 //Updates the actual x coordinate
                 x = x0 + i;
 
@@ -166,16 +181,15 @@ public class EarthGenerator extends ChunkGenerator {
                     surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(x, 1, z), x, z, iNullIslandHeight, 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, land);
                 }
             }
-
             return;
         }
 
         //All heights done before new thread created
         heights = elevationManager.getHeights(x0, x1, z0, z1);
-        Thread bigThread = new Thread(() ->
-        {
-            Thread newThread = new Thread(() ->
-            {
+      //  Thread bigThread = new Thread(() ->
+      //  {
+
+
                 int X0 = x0;
                 int X1 = x1;
                 int Z0 = z0;
@@ -227,86 +241,29 @@ public class EarthGenerator extends ChunkGenerator {
                         grid = BU.getGrid();
                     }
                 }
+                buildChunk(X0, Z0, chunk1);
 
+      //  }); //End big thread
 
-                //If the thread got interrupted, don't do the generation
-                if (!bStopped)
-                    buildChunk(X0, Z0, chunk1);
-            });
-            newThread.start();
-
-            try
-            {
-                int i = 0;
-                do
-                {
-                    Thread.currentThread().sleep(200);
-                    i++;
-                }
-                while(newThread.isAlive() && i < 45);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-
-            boolean bAlive = newThread.isAlive();
-            //If it is still going after 9s
-            if (bAlive)
-            {
-                //Stop the thread
-                newThread.interrupt();
-                bStopped = true;
-
-                UK121.LOGGER.info("Chunk took longer than 9 seconds... using other api");
-                //Start a new thread for the alternative api
-                Thread secondThread = new Thread(() ->
-                {
-                    //Checks for projection not needed as if it was not in the projection it would never reach this
-
-                    double[] corner1 = projection.toGeo(x0,z0);
-                    double[] corner2 = projection.toGeo(x1,z1);
-                    //xMin, zMin, zMax, zMax
-                    double[] geoCords = {min(corner1[1], corner2[1]), min(corner1[0], corner2[0]), max(corner1[1], corner2[1]), max(corner1[0], corner2[0])};
-
-                    //Multiply the bbox by 3 on both sides
-                    double xRange = geoCords[2]-geoCords[0];
-                    geoCords[0] = geoCords[0] - Math.abs(xRange);
-                    geoCords[2] = geoCords[2] + Math.abs(xRange);
-
-                    double zRange = geoCords[3]-geoCords[1];
-                    geoCords[1] = geoCords[1] - Math.abs(zRange);
-                    geoCords[3] = geoCords[3] + Math.abs(zRange);
-
-                    //Creates bounding box for use by the osm fetcher
-                    BoundingBox bb = new BoundingBox(geoCords);
-                    BlockUse BU = new BlockUse(bb, new int[]{x0-16, z0-16}, projection);
-                    BU.fillGrid(true);
-                    grid = BU.getGrid();
-
-                    buildChunk(x0, z0, chunk);
-
-                });
-                secondThread.start();
-            } //End if bAlive
-        }); //End big thread
-
-        bigThread.start();
+     //   bigThread.start();
 
     //    //Hold up this thread until all the generation is finished, affectively meaning that only one chunk can be done at 1 time
         //This means that api spamming is stopped but the 60 second api lag issue no longer occurs
         //I believe it will also fix the slow rendering issue
-      //  while (bigThread.isAlive())
-      //  {
+    /*    while (bigThread.isAlive())
+        {
             try
             {
                 //Tested at 70 but is 80 for safety
-                Thread.currentThread().sleep(80);
+                Thread.currentThread().sleep(0);
             }
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
-      //  }
+        // where the end comment was
+        }
+
+     */
     } //End build surface
 
     private void buildChunk(int x0, int z0, Chunk chunk)
@@ -339,11 +296,28 @@ public class EarthGenerator extends ChunkGenerator {
                         surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, land);
                         break;
 
-                    case Road:
-                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, roadLine);
+                    case Motorway:
+                    case MotorwayDerived:
+                    case Primary:
+                    case PrimaryDerived:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, goodRoad);
+                        break;
 
-                    case RoadDerived:
-                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, road);
+                    case Secondary:
+                    case SecondaryDerived:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, normalRoad);
+                        break;
+
+                    case Tertiary:
+                    case TertiaryDerived:
+                    case Track:
+                    case TrackDerived:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, wornRoad);
+                        break;
+
+                    case Footway:
+                    case FootwayDerived:
+                        surfaceBuilder.generate(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, footway);
                         break;
 
                     case BuildingOutline:
@@ -354,7 +328,6 @@ public class EarthGenerator extends ChunkGenerator {
                         surfaceBuilder.generateWater(random, chunk, biomeSource.getBiomeForNoiseGen(X, 1, Z), X, Z, heights[i][j], 0.0, stoneBlock, defaultFluid, ConfigVariables.seaLevel, 0, 0, seabed);
                         break;
                 }
-
             }
         }
     }

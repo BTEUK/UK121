@@ -18,12 +18,14 @@ public class BlockVector3
      * @param x the X coordinate
      * @param z the Z coordinate
      */
-    private BlockVector3(int x, int z) {
+    private BlockVector3(int x, int z)
+    {
         this.x = x;
         this.z = z;
     }
 
-    public static BlockVector3 at(double x, double z) {
+    public static BlockVector3 at(double x, double z)
+    {
         return at((int) Math.floor(x), (int) Math.floor(z));
     }
 
