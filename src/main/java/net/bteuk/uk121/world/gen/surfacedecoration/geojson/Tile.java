@@ -8,7 +8,7 @@ public class Tile extends JsonAPICall
     {
         super(z, x);
         szURL = "https://cloud.daporkchop.net/gis/osm/0/tile/"+x+"/"+z+".json";
-    //    System.out.println(szURL);
+        System.out.println(szURL);
     }
 
     public void getInfo()
@@ -26,6 +26,27 @@ public class Tile extends JsonAPICall
         for (int i = 0 ; i < jsonNodes.length ; i++)
         {
             infos[i] = new TileInfo();
+            if (infos[i].type !=null)
+            {
+                //If the type is a reference, refer to the reference
+                if (infos[i].type.equals("Reference"))
+                {
+                    if (infos[i].location.startsWith("way"));
+                    {
+                        JsonAPICall newCall = new JsonAPICall("https://cloud.daporkchop.net/gis/osm/0/"+infos[i].location);
+                        newCall.getFile();
+                        jsonNodes[i] = newCall.jsonText;
+                        infos[i] = gson.fromJson(jsonNodes[i], TileInfo.class);
+                    }
+                    //  Coastline coastline = new Coastline(infos[i].location);
+                    //  coastline.getInfo();
+                }
+            }
+            else
+            {
+                infos[i].type = "N/A";
+            }
+
             //Changes the coordinates
             if (jsonNodes[i].contains("coordinates"))
             {
@@ -69,19 +90,6 @@ public class Tile extends JsonAPICall
         //    System.out.println(jsonNodes[i]);
             infos[i] = gson.fromJson(jsonNodes[i], TileInfo.class);
 
-            if (infos[i].type !=null)
-            {
-                //If the type is a reference, refer to the reference
-                if (infos[i].type.equals("Reference"))
-                {
-                  //  Coastline coastline = new Coastline(infos[i].location);
-                  //  coastline.getInfo();
-                }
-            }
-            else
-            {
-                infos[i].type = "N/A";
-            }
         }
     }
 }
