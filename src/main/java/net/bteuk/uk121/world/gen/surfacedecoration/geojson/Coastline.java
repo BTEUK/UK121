@@ -6,7 +6,7 @@ public class Coastline extends JsonAPICall
 
     public Coastline(String url)
     {
-        super("https://cloud.daporkchop.net/gis/osm/0/"+url);
+        super(url);
         System.out.println(szURL);
     }
 

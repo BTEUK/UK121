@@ -7,6 +7,7 @@ package net.bteuk.uk121.world.gen.surfacedecoration;
 import net.bteuk.uk121.TerraConstants;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 import net.bteuk.uk121.world.gen.surfacedecoration.geojson.TileGrid;
+import net.bteuk.uk121.world.gen.surfacedecoration.geometry.Point;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.*;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Object;
 
@@ -63,11 +64,33 @@ public class BlockUse
 
  //       ways = GetOSM.entry(bbox, bAlternative);
 
+        Calendar cal = Calendar.getInstance();
+        Date time = cal.getTime();
+        long lTimeGetTileInfo1 = time.getTime();
+
         TileGrid tileGrid = new TileGrid(bbox);
         tileGrid.getInfo();
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeGetTileInfo2 = time.getTime();
+
+        System.out.println("1.1.1 Time to get info from Json files: "+(lTimeGetTileInfo2-lTimeGetTileInfo1)+" ms");
+
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeGetData1 = time.getTime();
+
         ways = tileGrid.readInfoToWays();
 
-     //   cal = Calendar.getInstance();
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeGetData2 = time.getTime();
+
+        System.out.println("1.1.2 Time to read info into ways: "+(lTimeGetData2-lTimeGetData1)+" ms");
+
+        //   cal = Calendar.getInstance();
     //    time = cal.getTime();
      //   long lTime2 = time.getTime();
 
@@ -77,10 +100,15 @@ public class BlockUse
             System.out.println("Got "+ways.size() +" ways: " + (lTime2 - lTime1) + "ms");
 
      */
-        int i;
 
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToInterpretData1 = time.getTime();
+
+        int i;
+        final int iWays = ways.size();
         //Goes through each "way" in the data
-        for (i = 0 ; i < ways.size() ; i++)
+        for (i = 0 ; i < iWays ; i++)
         {
             //Imports the tags and nodes of the way
             Way way = ways.get(i);
@@ -90,55 +118,70 @@ public class BlockUse
         //    System.out.println("ID: "+way.getId());
 
             UseType useType = UseType.Land;
+
             boolean bHighway = false;
 
+            boolean bUseGathered = false;
+
+            //Goes through each tag, looking for features which need to be generated
             for (Tag tag: tags)
             {
-                //Checks tag keys for highway and if found, stop searching tags and deal with the way as a road
-                if (tag.key.equals("highway"))
+                //Checks tag keys
+                switch (tag.key)
                 {
-                    bHighway = true;
+                    case "highway":
+                        bHighway = true;
 
-                    switch (tag.value)
-                    {
-                        case "motorway":
-                            useType = UseType.Motorway;
-                            break;
-                        case "trunk":
-                        case "primary":
-                            useType = UseType.Primary;
-                            break;
-                        case "secondary":
-                            useType = UseType.Secondary;
-                            break;
-                        case "track":
-                            useType = UseType.Track;
-                            break;
-                        case "footway":
-                        case "cycleway":
-                        case "bridleway":
-                        case "path":
-                            useType = UseType.Footway;
-                            break;
-                        case "tertiary":
-                        default:
-                            useType = UseType.Tertiary;
-                            break;
-                    }
+                        switch (tag.value)
+                        {
+                            case "motorway":
+                                useType = UseType.Motorway;
+                                break;
+                            case "trunk":
+                            case "primary":
+                                useType = UseType.Primary;
+                                break;
+                            case "secondary":
+                                useType = UseType.Secondary;
+                                break;
+                            case "track":
+                                useType = UseType.Track;
+                                break;
+                            case "footway":
+                            case "cycleway":
+                            case "bridleway":
+                            case "path":
+                                useType = UseType.Footway;
+                                break;
+                            case "tertiary":
+                            default:
+                                useType = UseType.Tertiary;
+                                break;
+                        }
+                        bUseGathered = true;
+                        break;
+                    case "building":
+                        useType = UseType.BuildingOutline;
+                        break;
+
+                    case "water":
+                        useType = UseType.Water;
+                        break;
                 }
-                else if (tag.key.equals("building"))
-                {
-                    useType = UseType.BuildingOutline;
+
+                if (bUseGathered)
                     break;
-                }
             }
 
-            //Deal with building or highway
-            if (bHighway || useType == UseType.BuildingOutline)
+            //Deal with building, highway or water polygon
+            if (bHighway || useType == UseType.BuildingOutline || useType == UseType.Water)
             {
+                final int iNodes = nodes.size();
                 //Stores the block coordinates of each of the nodes
-                int[][] iNodeBlocks = new int[nodes.size()][2];
+                int[][] iNodeBlocks = new int[iNodes][2];
                 int iCount = 0;
+
+                Point[] Polygon = new Point[iNodes-1];
 
                 //Goes through each node and adds it to the node blocks array
                 for (Node node : nodes)
@@ -149,12 +192,16 @@ public class BlockUse
                     iNodeBlocks[iCount][1] = (int) (MCcoords[1] - blockMins[1])/1;
                   //        System.out.println("The blocks of the downloaded node:");
                   //         System.out.println(iNodeBlocks[iCount][1]);
-
                     if (iNodeBlocks[iCount][0] >= 0 && iNodeBlocks[iCount][0] < 48 && iNodeBlocks[iCount][1]>= 0 && iNodeBlocks[iCount][1] < 48)
                     {
                         grid[iNodeBlocks[iCount][0]][iNodeBlocks[iCount][1]] = useType;
                     }
 
+                    if (useType == UseType.Water && iCount < iNodes-1)
+                    {
+                        Point point = new Point((int) (MCcoords[0] - blockMins[0])/1, (int) (MCcoords[1] - blockMins[1])/1);
+                        Polygon[iCount] = point;
+                    }
                     iCount++;
                 }
 
@@ -169,7 +216,9 @@ public class BlockUse
                 for (int j = 1 ; j < iCount ; j++)
                 {
                     ArrayList<BlockVector3> vset =  line.drawLine(iNodeBlocks[j - 1][0], iNodeBlocks[j - 1][1], iNodeBlocks[j][0], iNodeBlocks[j][1]);
-                    for (int k = 0 ; k < vset.size() ; k++)
+                    final int iSetSize = vset.size();
+
+                    for (int k = 0 ; k < iSetSize ; k++)
                     {
                         int iBestBlockX = vset.get(k).getBlockX();
                         int iBestBlockZ = vset.get(k).getBlockZ();
@@ -180,10 +229,32 @@ public class BlockUse
                         }
                     }
                 }
+
+                if (useType == UseType.Water)
+                {
+                    //Creates pool of water from polygon
+                    for (int k = 16; k < 32; k++)
+                    {
+                        for (int l = 16; l < 32; l++)
+                        {
+                            Point p = new Point(k, l);
+                            if (Point.isInside(Polygon, iNodes-1, p))
+                            {
+                                grid[k][l] = UseType.Water;
+                            }
+                        }
+                    }
+                }
             }
         }
         //Fills the rest of the grid with land
         clearRemaining();
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToInterpretData2 = time.getTime();
+
+        System.out.println("1.1.3 Time to plot data: "+(lTimeToInterpretData2-lTimeToInterpretData1)+" ms");
     }
 
     private void nextNode(int[][] iNodeBlocks, int j, int iCount, int xOffset, int zOffset, UseType useType)

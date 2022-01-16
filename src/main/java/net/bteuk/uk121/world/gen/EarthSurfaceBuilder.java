@@ -24,18 +24,24 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
     }
 
     @Override
-    public void generate(Random random, Chunk chunk, Biome biome, int x, int z, int height, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int i, long l, TernarySurfaceConfig surfaceConfig) {
+    public void generate(Random random, Chunk chunk, Biome biome, int x, int z, int height, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int i, long l, TernarySurfaceConfig surfaceConfig)
+    {
 
         //Generates defaultBlock at the specified location x,height,z
         //chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
 
         //Generated defaultBlock at the specified height and everything below that.
+
+        BlockState Top = surfaceConfig.getTopMaterial();
+
         for (int h = ConfigVariables.yMin; h <= height; h++)
         {
             if (h == height)
             {
-                chunk.setBlockState(new BlockPos(x, h, z), surfaceConfig.getTopMaterial(), false);
-            } else {
+                chunk.setBlockState(new BlockPos(x, h, z), Top, false);
+            }
+            else
+            {
                 chunk.setBlockState(new BlockPos(x, h, z), defaultBlock, false);
             }
         }
@@ -47,17 +53,23 @@ public class EarthSurfaceBuilder extends SurfaceBuilder<TernarySurfaceConfig> {
         //chunk.setBlockState(new BlockPos(x, height, z), defaultBlock, false);
 
         //Generated defaultBlock at the specified height and everything below that.
-        for (int h = ConfigVariables.yMin; h <= height; h++)
+        BlockState Top = surfaceConfig.getTopMaterial();
+
+        for (int h = ConfigVariables.yMin; h <= height-1; h++)
         {
-            if (h == height)
+            if (h == height-1)
             {
-                chunk.setBlockState(new BlockPos(x, h, z), surfaceConfig.getTopMaterial(), false);
-            } else {
+                chunk.setBlockState(new BlockPos(x, h, z), Top, false);
+            }
+            else
+            {
                 chunk.setBlockState(new BlockPos(x, h, z), defaultBlock, false);
             }
         }
 
-        for (int h = height+1 ; h < seaLevel; h++)
+        chunk.setBlockState(new BlockPos(x, height, z), defaultFluid, false);
+
+        for (int h = height+1 ; h <= seaLevel+1; h++)
         {
             chunk.setBlockState(new BlockPos(x, h, z), defaultFluid, false);
         }

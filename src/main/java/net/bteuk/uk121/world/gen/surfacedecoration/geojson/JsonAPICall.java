@@ -24,7 +24,7 @@ public class JsonAPICall
     public static void main(String[] args)
     {
         Tile test = new Tile(3286, 92);
-        test.getInfo();
+        test.getInfo(1);
     }
 
     //For use if only the tile numbers are known upon creating the object
@@ -33,13 +33,20 @@ public class JsonAPICall
         this.x = x;
         this.z = z;
 
+        szURL = "https://cloud.daporkchop.net/gis/osm/0/tile/"+x+"/"+z+".json";
+        System.out.println(szURL);
+
         fileName = directory+"-"+x+"-"+z+".json";
     }
 
     //For use if the url is already known upon creating the object
-    public JsonAPICall(String url)
+    public JsonAPICall(String end)
     {
-        this.szURL = url;
+        StringBuilder sb = new StringBuilder("https://cloud.daporkchop.net/gis/osm/0/");
+        sb.append(end);
+
+        fileName = directory + end.replace("/", "-");
+        this.szURL = sb.toString();
     }
 
     protected boolean getFile()
@@ -48,17 +55,20 @@ public class JsonAPICall
 
         if (!newDirectory.exists())
         {
-            System.out.println("Downloading file");
+            System.out.println("Downloading tile");
             downloadFile();
         }
         //Already stored in cache
         try
         {
-            InputStream is = newDirectory.toURI().toURL().openStream();
-            getData(is);
+           // InputStream is = newDirectory.toURI().toURL().openStream();
+           // getData(is);
+            return (readDataFromFile(newDirectory));
         }
         catch (Exception e)
         {
+            String JsonText = "";
+            jsonNodes = jsonText.split("\n");
         }
         return true;
     }
@@ -99,53 +109,80 @@ public class JsonAPICall
 
     private boolean getData(InputStream is)
     {
+        jsonText = "";
         BufferedReader bufferedReader;
-        try
+        if (is == null)
         {
-            is = new URL(szURL).openStream();
-            if (is == null)
-            {
-                System.out.println("Null tile");
-                return false;
-            }
-            bufferedReader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            jsonText = readAll(bufferedReader);
-            jsonText = jsonText.trim();
-            jsonNodes = jsonText.split("\n");
-            return true;
-        }
-        catch (IOException e)
-        {
-            System.out.println(e.getMessage());
+            System.out.println("Null tile");
             return false;
         }
-        finally
+        bufferedReader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+        jsonText = readAll(bufferedReader);
+        jsonText = jsonText.trim();
+        jsonNodes = jsonText.split("\n");
+        return true;
+    }
+
+    private boolean readDataFromFile(File file)
+    {
+        jsonText = "";
+        BufferedReader bufferedReader;
+        FileReader fileReader;
+
+        try
         {
-            try
-            {
-                if (is != null)
-                    is.close();
-            }
-            catch (IOException e)
-            {
-                return false;
-            }
+            fileReader = new FileReader(file);
+
+            bufferedReader = new BufferedReader(fileReader);
+            jsonText = readAll(bufferedReader);
+
+            fileReader.close();
+            bufferedReader.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            jsonText = "";
+            return false;
+        }
+        jsonText = jsonText.trim();
+        jsonNodes = jsonText.split("\n");
+        return true;
+    }
+
+    public boolean noDownload()
+    {
+        InputStream in;
+        try
+        {
+            URL website = new URL(szURL);
+            in = website.openStream();
+            return getData(in);
+        }
+        catch (Exception e)
+        {
+            return false;
         }
     }
 
     private String readAll(BufferedReader br)
     {
-        StringBuilder sb = new StringBuilder();
-        int cp;
+        StringBuilder sb = new StringBuilder("");
+     //   int cp;
         try
         {
-            while ((cp = br.read()) != -1)
+            String line;
+            line = br.readLine();
+            while (line != null)
             {
-                sb.append((char) cp);
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
             }
         }
         catch (IOException e)
         {
+            e.printStackTrace();
             sb = new StringBuilder();
         }
         return sb.toString();

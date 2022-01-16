@@ -6,6 +6,8 @@ import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Tag;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Way;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class TileGrid
 {
@@ -78,9 +80,12 @@ public class TileGrid
     {
         int iCount;
 
+        Calendar cal;
+        Date time;
+
         for (iCount = 0 ; iCount < tileGrid.length ; iCount++)
         {
-            tileGrid[iCount].getInfo();
+            tileGrid[iCount].getInfo(iCount);
         }
     }
 
@@ -121,8 +126,10 @@ public class TileGrid
                         if (tileGrid[iCount].infos[iInfos].properties == null)
                             tileGrid[iCount].infos[iInfos].properties = new String[0][0];
 
-                        //Adds tags to way
-                        for (int i = 0; i < tileGrid[iCount].infos[iInfos].properties.length; i++)
+                        int iProperties = tileGrid[iCount].infos[iInfos].properties.length;
+
+                        //Adds the tags to the way
+                        for (int i = 0; i < iProperties ; i++)
                         {
                             tag = new Tag(tileGrid[iCount].infos[iInfos].properties[i][0], tileGrid[iCount].infos[iInfos].properties[i][1]);
                             way.getTags().add(tag);

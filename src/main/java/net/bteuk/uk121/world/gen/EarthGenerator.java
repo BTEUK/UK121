@@ -11,6 +11,7 @@ import net.bteuk.uk121.world.gen.surfacedecoration.BlockUse;
 import net.bteuk.uk121.world.gen.surfacedecoration.BoundingBox;
 //import net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld.Tile;
 import net.bteuk.uk121.world.gen.surfacedecoration.UseType;
+import net.bteuk.uk121.world.gen.surfacedecoration.geojson.TileGrid;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.ChunkPos;
@@ -93,6 +94,7 @@ public class EarthGenerator extends ChunkGenerator {
 
         //Default fluid set to water.
         defaultFluid = Blocks.WATER.getDefaultState();
+
         this.populationSource = populationSource;
         this.biomeSource = biomeSource;
 
@@ -147,6 +149,14 @@ public class EarthGenerator extends ChunkGenerator {
     @Override
     public void buildSurface(ChunkRegion region, Chunk chunk)
     {
+        Calendar cal = Calendar.getInstance();
+        Date time = cal.getTime();
+        long lTimeBuildSurface1 = time.getTime();
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToDoSetup1 = time.getTime();
+
         //Get the location of the chunk
         ChunkPos chunkPos = chunk.getPos();
         //Get the chunk x and z
@@ -184,66 +194,112 @@ public class EarthGenerator extends ChunkGenerator {
             return;
         }
 
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToDoSetup2 = time.getTime();
+
+  //      System.out.println("Time to do initial setup and null island: "+(lTimeToDoSetup2-lTimeToDoSetup1)+" ms");
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToGetHeights1 = time.getTime();
+
         //All heights done before new thread created
         heights = elevationManager.getHeights(x0, x1, z0, z1);
-      //  Thread bigThread = new Thread(() ->
-      //  {
 
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToGetHeights2 = time.getTime();
 
-                int X0 = x0;
-                int X1 = x1;
-                int Z0 = z0;
-                int Z1 = z1;
-                Chunk chunk1 = chunk;
+   //     System.out.println("Time to get heights: "+(lTimeToGetHeights2-lTimeToGetHeights1)+" ms");
 
-                double[] corner1 = projection.toGeo(X0, Z0);
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeOSM1 = time.getTime();
 
-                //If the chunk is not part of the projection, fill it with water
+        int X0 = x0;
+        int X1 = x1;
+        int Z0 = z0;
+        int Z1 = z1;
+        Chunk chunk1 = chunk;
 
-                boolean bVoid = false; //TESTING
+        double[] corner1 = projection.toGeo(X0, Z0);
 
-                if (bVoid)
-                {
-                    BlockUse BU = new BlockUse(UseType.Land);
-                    grid = BU.getGrid();
-                }
-                else if (Double.isNaN(corner1[0]))
-                {
-                    BlockUse BU = new BlockUse(UseType.Water);
-                    grid = BU.getGrid();
-                }
-                else
-                {
-                    double[] corner2 = projection.toGeo(X1, Z1);
-                    if (Double.isNaN(corner2[0]))
-                    {
-                        BlockUse BU = new BlockUse(UseType.Water);
-                        grid = BU.getGrid();
-                    }
-                    else
-                    {
-                        //xMin, zMin, zMax, zMax
-                        double[] geoCords = {min(corner1[1], corner2[1]), min(corner1[0], corner2[0]), max(corner1[1], corner2[1]), max(corner1[0], corner2[0])};
+        //If the chunk is not part of the projection, fill it with water
 
-                        //Multiply the bbox by 3 on both sides
-                        double xRange = geoCords[2] - geoCords[0];
-                        geoCords[0] = geoCords[0] - Math.abs(xRange);
-                        geoCords[2] = geoCords[2] + Math.abs(xRange);
+        boolean bVoid = false; //TESTING
 
-                        double zRange = geoCords[3] - geoCords[1];
-                        geoCords[1] = geoCords[1] - Math.abs(zRange);
-                        geoCords[3] = geoCords[3] + Math.abs(zRange);
+        if (bVoid)
+        {
+            BlockUse BU = new BlockUse(UseType.Land);
+            grid = BU.getGrid();
+        }
+        else if (Double.isNaN(corner1[0]))
+        {
+            BlockUse BU = new BlockUse(UseType.Water);
+            grid = BU.getGrid();
+        }
+        else
+        {
+            double[] corner2 = projection.toGeo(X1, Z1);
+            if (Double.isNaN(corner2[0]))
+            {
+                BlockUse BU = new BlockUse(UseType.Water);
+                grid = BU.getGrid();
+            }
+            else
+            {
+                //xMin, zMin, zMax, zMax
+                double[] geoCords = {min(corner1[1], corner2[1]), min(corner1[0], corner2[0]), max(corner1[1], corner2[1]), max(corner1[0], corner2[0])};
 
-                        //Creates bounding box for use by the osm fetcher
-                        BoundingBox bb = new BoundingBox(geoCords);
-                        BlockUse BU = new BlockUse(bb, new int[]{X0 - 16, Z0 - 16}, projection);
-                        BU.fillGrid(false);
-                        grid = BU.getGrid();
-                    }
-                }
-                buildChunk(X0, Z0, chunk1);
+                //Multiply the bbox by 3 on both sides
+                double xRange = geoCords[2] - geoCords[0];
+                geoCords[0] = geoCords[0] - Math.abs(xRange);
+                geoCords[2] = geoCords[2] + Math.abs(xRange);
 
-      //  }); //End big thread
+                double zRange = geoCords[3] - geoCords[1];
+                geoCords[1] = geoCords[1] - Math.abs(zRange);
+                geoCords[3] = geoCords[3] + Math.abs(zRange);
+
+                //Creates bounding box for use by the osm fetcher
+                BoundingBox bb = new BoundingBox(geoCords);
+                BlockUse BU = new BlockUse(bb, new int[]{X0 - 16, Z0 - 16}, projection);
+
+                cal = Calendar.getInstance();
+                time = cal.getTime();
+                long lTimeGetData1 = time.getTime();
+
+                BU.fillGrid(false);
+
+                cal = Calendar.getInstance();
+                time = cal.getTime();
+                long lTimeGetData2 = time.getTime();
+
+                System.out.println("1.1 Time to actually get and interpret OSM data: "+(lTimeGetData2-lTimeGetData1)+" ms");
+
+                grid = BU.getGrid();
+            }
+        }
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeOSM2 = time.getTime();
+
+        System.out.println("1 Time to do all OSM data: "+(lTimeOSM2-lTimeOSM1)+" ms");
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToGenerateBlocks1 = time.getTime();
+
+        buildChunk(X0, Z0, chunk1);
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToGenerateBlocks2 = time.getTime();
+
+        System.out.println("Time to generate the blocks in chunk: "+(lTimeToGenerateBlocks2-lTimeToGenerateBlocks1)+" ms");
+
+        //  }); //End big thread
 
      //   bigThread.start();
 
@@ -264,6 +320,13 @@ public class EarthGenerator extends ChunkGenerator {
         }
 
      */
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeBuildSurface2 = time.getTime();
+
+        System.out.println("Time to do chunk: "+(lTimeBuildSurface2-lTimeBuildSurface1)+" ms");
+
     } //End build surface
 
     private void buildChunk(int x0, int z0, Chunk chunk)
