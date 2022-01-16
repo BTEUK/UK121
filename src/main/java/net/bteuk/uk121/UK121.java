@@ -1,32 +1,28 @@
 package net.bteuk.uk121;
 
-import net.bteuk.uk121.commands.Tpll;
 import net.bteuk.uk121.mixin.GeneratorTypeAccessor;
 import net.bteuk.uk121.world.gen.EarthGenerator;
 import net.bteuk.uk121.world.gen.biome.EarthBiomeSource;
 import net.bteuk.uk121.world.gen.biome.EarthPopulationSource;
 import net.bteuk.uk121.world.gen.biome.EmptyBiome;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.world.GeneratorType;
-import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.*;
-import net.minecraft.world.World;
+import net.minecraft.util.registry.BuiltinRegistries;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.chunk.*;
+import net.minecraft.world.gen.GeneratorOptions;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.Path;
-import java.util.*;
-
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.minecraft.command.argument.MessageArgumentType.getMessage;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import java.util.Properties;
+import java.util.function.BiFunction;
 
 public class UK121 implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -48,18 +44,14 @@ public class UK121 implements ModInitializer {
     private Config config;
     public static Config CONFIG;
 
-    //Adds the "void" generator type - used for testing
-    private static final GeneratorType VOID = new GeneratorType("void")
-    {
-        protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
-                                                   Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry, long seed) {
-            FlatChunkGeneratorConfig config = new FlatChunkGeneratorConfig(
-                    new StructuresConfig(Optional.empty(), Collections.emptyMap()), biomeRegistry);
-            config.updateLayerBlocks();
-            return new FlatChunkGenerator(config);
+    private static final BiFunction<Long, Properties, GeneratorOptions > options = new BiFunction<Long, Properties, GeneratorOptions>() {
+        @Override
+        public GeneratorOptions apply(Long aLong, Properties properties) {
+            return null;
         }
     };
 
+    /*
     //Adds the "Earth" generator type, used for generating the earth
     private static final GeneratorType EARTH = new GeneratorType("earth") {
         //Returns a new EarthGenerator class
@@ -76,6 +68,7 @@ public class UK121 implements ModInitializer {
             return new EarthGenerator(earthPopulationSource, earthBiomeSource);
         }
     };
+     */
 
     @Override
     public void onInitialize() {
@@ -83,18 +76,39 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-        //Adds the generator type to the accessor
-        GeneratorTypeAccessor.getValues().add(EARTH);
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            GeneratorType EARTH = new GeneratorType("earth") {
+                //Returns a new EarthGenerator class
+                protected ChunkGenerator getChunkGenerator(Registry<Biome> biomeRegistry,
+                                                           Registry<ChunkGeneratorSettings> chunkGeneratorSettingsRegistry,
+                                                           long seed) {
+
+                    //Initiates a new biome source object. Fields: biomes, biome size, seed
+                    EarthBiomeSource earthBiomeSource = new EarthBiomeSource(biomeRegistry, 0, 0);
+                    //Initiates a new biome population object. Fields: biomes, biome size, seed
+                    EarthPopulationSource earthPopulationSource = new EarthPopulationSource(biomeRegistry, 0, 0);
+
+                    //Returns a new EarthGenerator object, parsing the biome source in
+                    return new EarthGenerator(earthPopulationSource, earthBiomeSource);
+                }
+            };
+            GeneratorTypeAccessor.getValues().add(EARTH);
+        } else {
+            WorldTypeRegistry.registerLevelType("earth", options);
+        }
+
         //Register custom empty biome
         Registry.register(BuiltinRegistries.BIOME, EMPTY_KEY.getValue(), EMPTY);
         //Register Biome Source for biome and population
-        Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_population_source"), EarthPopulationSource.CODEC);
-        Registry.register(Registry.BIOME_SOURCE, new Identifier(MOD_ID, "earth_biome_source"), EarthBiomeSource.CODEC);
-        Registry.register(Registry.CHUNK_GENERATOR, id("chunkgenerator"), EarthGenerator.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, id("earth_population_source"), EarthPopulationSource.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, id("earth_biome_source"), EarthBiomeSource.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR, id("earth"), EarthGenerator.CODEC);
 
+        /*
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
             Tpll.register(dispatcher);
         }));
+         */
 
 
         //GeneratorTypeAccessor.getValues().add(VOID);
@@ -117,4 +131,8 @@ public class UK121 implements ModInitializer {
     public static final double EARTH_POLAR_CIRCUMFERENCE = 40008000;
 
     public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+
+    public static void log(Level level, String message){
+        LOGGER.log(level, "["+MOD_ID+"] " + message);
+    }
 }

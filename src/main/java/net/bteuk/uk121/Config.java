@@ -19,6 +19,7 @@ public class Config {
 
         Path directory = Path.of(System.getProperty("user.dir") + "/uk121/");
         Path elevations = Path.of(System.getProperty("user.dir") + "/uk121/Elevation/");
+        Path osm = Path.of(System.getProperty("user.dir") + "/uk121/Ways/");
 
         if (!Files.exists(directory)){
             try {
@@ -31,6 +32,14 @@ public class Config {
         if (!Files.exists(elevations)){
             try {
                 Files.createDirectory(elevations);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!Files.exists(osm)){
+            try {
+                Files.createDirectory(osm);
             } catch (IOException e) {
                 e.printStackTrace();
             }
