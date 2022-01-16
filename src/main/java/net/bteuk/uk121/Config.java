@@ -1,8 +1,5 @@
 package net.bteuk.uk121;
 
-import net.fabricmc.loader.api.FabricLoader;
-import org.apache.logging.log4j.LogManager;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +12,7 @@ public class Config {
 
     //Default values
     public int yMin = -256;
-    public int height = 2544;
+    public int height = 2288;
     public int seaLevel = 1;
 
     public Config() {
