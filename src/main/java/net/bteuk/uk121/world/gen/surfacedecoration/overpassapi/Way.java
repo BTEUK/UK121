@@ -6,7 +6,7 @@ public class Way// extends Object
 {
     ArrayList<Node> nodes;
     ArrayList<Tag> tags;
-    int id;
+    String id;
 
     public Way()
     {
@@ -22,5 +22,15 @@ public class Way// extends Object
     public ArrayList<Tag> getTags()
     {
         return tags;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
     }
 }

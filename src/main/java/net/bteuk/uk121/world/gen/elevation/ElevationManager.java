@@ -179,7 +179,7 @@ public class ElevationManager {
                         lats[j] = eTile.getLat(n);
                         elevs[i][j] = eTile.getHeight(m, n);
                         if (usedTiles.size() > 1) {
-                            UK121.LOGGER.info("Coords: " + lons[i] + ", " + lats[j] + ", Elev: " + elevs[i][j] + " Pixel: " + m + ", " + n + " Tile: " + tileX + ", " + tileZ);
+                        //    UK121.LOGGER.info("Coords: " + lons[i] + ", " + lats[j] + ", Elev: " + elevs[i][j] + " Pixel: " + m + ", " + n + " Tile: " + tileX + ", " + tileZ);
                         }
                         if (n == 255) {tileZ++;n = 0;} else {n++;}
                         break;
@@ -311,7 +311,8 @@ public class ElevationManager {
 */
     }
 
-    public ElevationTile loadTile(int[] tile, int zoom) {
+    public ElevationTile loadTile(int[] tile, int zoom)
+    {
 
         if (!(contains(zoom + "-" + tile[0] + "-" + tile[1]))) {
             ElevationTile elevationTile = new ElevationTile(zoom + "-" + tile[0] + "-" + tile[1], tile[0], tile[1], zoom);

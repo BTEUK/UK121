@@ -1,4 +1,4 @@
-package net.bteuk.uk121.world.gen.surfacedecoration.geojsonOld;
+package net.bteuk.uk121.world.gen.surfacedecoration.geojson;
 
 public class TileInfo
 {
@@ -7,12 +7,16 @@ public class TileInfo
     public String type;
     public String location;
     public Geometry geometry;
-    public Properties properties;
+    public String[][] properties;
     public String id;
 
     public TileInfo(String json)
     {
         jsonText = json;
+    }
+
+    public TileInfo()
+    {
     }
 
     public void tileLoad()

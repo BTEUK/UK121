@@ -47,10 +47,10 @@ public class BoundingBox
 
     public BoundingBox (double[] degrees)
     {
-        minX = degrees[0];
-        minZ = degrees[1];
-        maxX = degrees[2];
-        maxZ = degrees[3];
+        minX = degrees[0]; //lat
+        minZ = degrees[1]; //long
+        maxX = degrees[2]; //lat
+        maxZ = degrees[3]; //long
     }
 
     /**

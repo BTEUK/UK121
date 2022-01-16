@@ -27,37 +27,48 @@ public class APIService
     {
         BufferedImage image = null;
         File newDirectory;
-        String fileName = "";
+
+        //Determines the file name
+        String fileName = directory+zoom+"-"+xTile+"-"+yTile+".png";
+
         String dirName = "";
         InputStream in = null;
-        try
+
+        newDirectory = new File(fileName);
+
+        //Downloads the file if it doesn't exist
+        if (!newDirectory.exists())
         {
-            //Creates the file
-            fileName = directory+zoom+"-"+xTile+"-"+yTile+".png";
-            FileWriter fileWriter = new FileWriter(fileName);
-            boolean bCreated = false;
-            fileWriter.write("");
-
-            //Creates the link to the source
-            URL website = new URL(url);
-            in = website.openStream();
-
-            //  Files.copy(in, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
-            ReadableByteChannel readChannel = Channels.newChannel(in);
-            FileOutputStream fileOS = new FileOutputStream(fileName);
-            FileChannel writeChannel = fileOS.getChannel();
-            writeChannel
-                    .transferFrom(readChannel, 0, Long.MAX_VALUE);
-
-        }
-        catch (Exception e)
-        {
-            if (in!=null)
+            try
             {
-             //   in.close();
+                //Creates the file
+                FileWriter fileWriter = new FileWriter(fileName);
+                boolean bCreated = false;
+                fileWriter.write("");
+
+                //Creates the link to the source
+                URL website = new URL(url);
+                in = website.openStream();
+
+                //Copies the file
+                //  Files.copy(in, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+                ReadableByteChannel readChannel = Channels.newChannel(in);
+                FileOutputStream fileOS = new FileOutputStream(fileName);
+                FileChannel writeChannel = fileOS.getChannel();
+                writeChannel
+                        .transferFrom(readChannel, 0, Long.MAX_VALUE);
+
             }
-            e.printStackTrace();
+            catch (Exception e)
+            {
+                if (in!=null)
+                {
+                    //   in.close();
+                }
+                e.printStackTrace();
+            }
         }
+
         return fileName;
     }
 }

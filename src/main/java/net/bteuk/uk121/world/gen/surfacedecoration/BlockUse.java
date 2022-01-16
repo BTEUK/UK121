@@ -6,6 +6,8 @@ package net.bteuk.uk121.world.gen.surfacedecoration;
 
 import net.bteuk.uk121.TerraConstants;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
+import net.bteuk.uk121.world.gen.surfacedecoration.geojson.TileGrid;
+import net.bteuk.uk121.world.gen.surfacedecoration.geometry.Point;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.*;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Object;
 
@@ -44,7 +46,7 @@ public class BlockUse
         int[] blockMins = {0, 0};
         BlockUse BU = new BlockUse(bbox , blockMins, TerraConstants.projection);
 
-        BU.fillGrid();
+        BU.fillGrid(false);
 
      //   BU.display();
     }
@@ -54,107 +56,209 @@ public class BlockUse
         return grid;
     }
 
-    public void display()
+    public void fillGrid(boolean bAlternative)
     {
-        for (int i = 16 ; i < 32 ; i++)
-        {
-            for (int j = 16 ; j < 32 ; j++)
-            {
-                if (grid[i][j] == UseType.Land)
-                {
-                    System.out.print(" L ");
-                }
-                if (grid[i][j] == UseType.Road)
-                    System.out.print(" R ");
+    //    Calendar cal = Calendar.getInstance();
+     //   Date time = cal.getTime();
+    //    long lTime1 = time.getTime();
 
-            }
-            System.out.println();
-        }
-        System.out.println("------------------------------------------------");
-    }
-
-    public void fillGrid()
-    {
-        //Returning an array list of objects wasn't working
+ //       ways = GetOSM.entry(bbox, bAlternative);
 
         Calendar cal = Calendar.getInstance();
         Date time = cal.getTime();
-        long lTime1 = time.getTime();
+        long lTimeGetTileInfo1 = time.getTime();
 
-        ways = GetOSM.entry(bbox);
+        TileGrid tileGrid = new TileGrid(bbox);
+        tileGrid.getInfo();
 
         cal = Calendar.getInstance();
         time = cal.getTime();
-        long lTime2 = time.getTime();
+        long lTimeGetTileInfo2 = time.getTime();
 
-        System.out.println("Getting ways: " +(lTime2-lTime1) +"ms");
+        System.out.println("1.1.1 Time to get info from Json files: "+(lTimeGetTileInfo2-lTimeGetTileInfo1)+" ms");
 
-        boolean bHighway;
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeGetData1 = time.getTime();
+
+        ways = tileGrid.readInfoToWays();
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeGetData2 = time.getTime();
+
+        System.out.println("1.1.2 Time to read info into ways: "+(lTimeGetData2-lTimeGetData1)+" ms");
+
+        //   cal = Calendar.getInstance();
+    //    time = cal.getTime();
+     //   long lTime2 = time.getTime();
+
+    /*    if (bAlternative)
+            System.out.println("Got "+ways.size() +" ways, alt api: " + (lTime2 - lTime1) + "ms");
+        else
+            System.out.println("Got "+ways.size() +" ways: " + (lTime2 - lTime1) + "ms");
+
+     */
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToInterpretData1 = time.getTime();
+
         int i;
-
+        final int iWays = ways.size();
         //Goes through each "way" in the data
-        for (i = 0 ; i < ways.size() ; i++)
+        for (i = 0 ; i < iWays ; i++)
         {
             //Imports the tags and nodes of the way
             Way way = ways.get(i);
             ArrayList<Tag> tags = way.getTags();
             ArrayList<Node> nodes = way.getNodes();
 
+        //    System.out.println("ID: "+way.getId());
+
             UseType useType = UseType.Land;
 
+            boolean bHighway = false;
+
+            boolean bUseGathered = false;
+
+            //Goes through each tag, looking for features which need to be generated
             for (Tag tag: tags)
             {
-          //      System.out.println(tag.key);
+                //Checks tag keys
+                switch (tag.key)
+                {
+                    case "highway":
+                        bHighway = true;
 
-                //Checks tag keys for highway and if found, stop searching tags and deal with the way as a road
-                if (tag.key.equals("highway"))
-                {
-                    useType = UseType.Road;
+                        switch (tag.value)
+                        {
+                            case "motorway":
+                                useType = UseType.Motorway;
+                                break;
+                            case "trunk":
+                            case "primary":
+                                useType = UseType.Primary;
+                                break;
+                            case "secondary":
+                                useType = UseType.Secondary;
+                                break;
+                            case "track":
+                                useType = UseType.Track;
+                                break;
+                            case "footway":
+                            case "cycleway":
+                            case "bridleway":
+                            case "path":
+                                useType = UseType.Footway;
+                                break;
+                            case "tertiary":
+                            default:
+                                useType = UseType.Tertiary;
+                                break;
+                        }
+                        bUseGathered = true;
+                        break;
+                    case "building":
+                        useType = UseType.BuildingOutline;
+                        break;
+
+                    case "water":
+                        useType = UseType.Water;
+                        break;
+                }
+
+                if (bUseGathered)
                     break;
-                }
-                else if (tag.key.equals("building"))
-                {
-                    useType = UseType.BuildingOutline;
-                }
             }
 
-            //Deal with building or highway
-            if (useType == UseType.Road || useType == UseType.BuildingOutline)
+            //Deal with building, highway or water polygon
+            if (bHighway || useType == UseType.BuildingOutline || useType == UseType.Water)
             {
+                final int iNodes = nodes.size();
                 //Stores the block coordinates of each of the nodes
-                int[][] iNodeBlocks = new int[nodes.size()][2];
+                int[][] iNodeBlocks = new int[iNodes][2];
                 int iCount = 0;
+
+                Point[] Polygon = new Point[iNodes-1];
+
+                //Goes through each node and adds it to the node blocks array
                 for (Node node : nodes)
                 {
-                    double[] coords = projection.fromGeo(node.longitude, node.latitude);
+                    double[] MCcoords = projection.fromGeo(node.longitude, node.latitude);
 
-                    iNodeBlocks[iCount][0] = (int) Math.round(coords[0] - blockMins[0]);
-                    iNodeBlocks[iCount][1] = (int) Math.round(coords[1] - blockMins[1]);
-              //      System.out.println("The blocks of the downloaded node:");
-              //      System.out.println(iNodeBlocks[iCount][0]);
-             //       System.out.println(iNodeBlocks[iCount][1]);
+                    iNodeBlocks[iCount][0] = (int) (MCcoords[0] - blockMins[0])/1;
+                    iNodeBlocks[iCount][1] = (int) (MCcoords[1] - blockMins[1])/1;
+                  //        System.out.println("The blocks of the downloaded node:");
+                  //         System.out.println(iNodeBlocks[iCount][1]);
+                    if (iNodeBlocks[iCount][0] >= 0 && iNodeBlocks[iCount][0] < 48 && iNodeBlocks[iCount][1]>= 0 && iNodeBlocks[iCount][1] < 48)
+                    {
+                        grid[iNodeBlocks[iCount][0]][iNodeBlocks[iCount][1]] = useType;
+                    }
+
+                    if (useType == UseType.Water && iCount < iNodes-1)
+                    {
+                        Point point = new Point((int) (MCcoords[0] - blockMins[0])/1, (int) (MCcoords[1] - blockMins[1])/1);
+                        Polygon[iCount] = point;
+                    }
                     iCount++;
                 }
 
                 //Go through each node
-                for (int j = 0 ; j < iCount - 1 ; j++)
+            /*    for (int j = 0 ; j < iCount - 1 ; j++)
                 {
                     nextNode(iNodeBlocks, j, iCount, 0, 0, useType);
+                }
+            */
+                //Go through each node
+                Line line = new Line();
+                for (int j = 1 ; j < iCount ; j++)
+                {
+                    ArrayList<BlockVector3> vset =  line.drawLine(iNodeBlocks[j - 1][0], iNodeBlocks[j - 1][1], iNodeBlocks[j][0], iNodeBlocks[j][1]);
+                    final int iSetSize = vset.size();
+
+                    for (int k = 0 ; k < iSetSize ; k++)
+                    {
+                        int iBestBlockX = vset.get(k).getBlockX();
+                        int iBestBlockZ = vset.get(k).getBlockZ();
+
+                        if (iBestBlockX >= 0 && iBestBlockX < 48 && iBestBlockZ>= 0 && iBestBlockZ < 48)
+                        {
+                            grid[iBestBlockX][iBestBlockZ] = useType;
+                        }
+                    }
+                }
+
+                if (useType == UseType.Water)
+                {
+                    //Creates pool of water from polygon
+                    for (int k = 16; k < 32; k++)
+                    {
+                        for (int l = 16; l < 32; l++)
+                        {
+                            Point p = new Point(k, l);
+                            if (Point.isInside(Polygon, iNodes-1, p))
+                            {
+                                grid[k][l] = UseType.Water;
+                            }
+                        }
+                    }
                 }
             }
         }
         //Fills the rest of the grid with land
         clearRemaining();
+
+        cal = Calendar.getInstance();
+        time = cal.getTime();
+        long lTimeToInterpretData2 = time.getTime();
+
+        System.out.println("1.1.3 Time to plot data: "+(lTimeToInterpretData2-lTimeToInterpretData1)+" ms");
     }
 
     private void nextNode(int[][] iNodeBlocks, int j, int iCount, int xOffset, int zOffset, UseType useType)
     {
-     /*   //The last node
-        if (j + 1 >= iCount)
-        {
-            return;
-        }
-      */
         int iDistanceToNext;
         int iXComp, iZComp;
 
@@ -224,6 +328,9 @@ public class BlockUse
     private void clearRemaining()
     {
         int i, j, k, l;
+
+        float fThickness;
+
         for (i = 0 ; i < 48 ; i++)
         {
             for (j = 0 ; j < 48 ; j++)
@@ -232,19 +339,128 @@ public class BlockUse
                 {
                     grid[i][j] = UseType.Land;
                 }
-                else if (grid[i][j].equals(UseType.Road))
+
+                switch (grid[i][j])
                 {
-                    for (k = 0 ; k < 5 ; k++)
-                    {
-                        for (l = 0; l < 5 ; l++)
+                    case Motorway:
+                        fThickness = 9;
+                        for (k = -10 ; k < 10 ; k++)
                         {
-                            //If a block is 4 blocks distance from a road node, set its value to road derived
-                            if ((i+k)<48 && (j+l)<48 && (k*k + l*l) < 20)
+                            for (l = -10; l < 10 ; l++)
                             {
-                                grid[i+k][j+l] = UseType.RoadDerived;
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Motorway)
+                                    {
+                                        grid[i+k][j+l] = UseType.MotorwayDerived;
+                                    }
+                                }
                             }
                         }
-                    }
+                        break;
+
+                    case Primary:
+                        fThickness = 7;
+                        for (k = -8 ; k < 8 ; k++)
+                        {
+                            for (l = -8; l < 8 ; l++)
+                            {
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Primary)
+                                    {
+                                        grid[i+k][j+l] = UseType.PrimaryDerived;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    case Secondary:
+                        fThickness = 6;
+                        for (k = -7 ; k < 7 ; k++)
+                        {
+                            for (l = -7; l < 7 ; l++)
+                            {
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Secondary)
+                                    {
+                                        grid[i+k][j+l] = UseType.SecondaryDerived;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    case Tertiary:
+                        fThickness = 4;
+                        for (k = -5 ; k < 5 ; k++)
+                        {
+                            for (l = -5; l < 5 ; l++)
+                            {
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Tertiary)
+                                    {
+                                        grid[i+k][j+l] = UseType.TertiaryDerived;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    case Footway:
+                        fThickness = 1;
+                        for (k = -2 ; k < 2 ; k++)
+                        {
+                            for (l = -2; l < 2 ; l++)
+                            {
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Footway)
+                                    {
+                                        grid[i+k][j+l] = UseType.FootwayDerived;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+
+                    case Track:
+                        fThickness = 3;
+                        for (k = -4 ; k < 4 ; k++)
+                        {
+                            for (l = -4; l < 4 ; l++)
+                            {
+                                if (l == 0 && k == 0)
+                                    continue;
+                                //If a block is 4 blocks distance from a road node, set its value to road derived
+                                if ((i+k)<48 && (j+l)<48 && (i+k)>=0 && (j+l)>=0 && (k*k + l*l) < fThickness*fThickness)
+                                {
+                                    if (grid[i+k][j+l] != UseType.Track)
+                                    {
+                                        grid[i+k][j+l] = UseType.TrackDerived;
+                                    }
+                                }
+                            }
+                        }
+                        break;
                 }
             }
         }

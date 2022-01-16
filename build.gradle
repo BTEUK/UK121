@@ -21,10 +21,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.22'
+    testImplementation 'org.projectlombok:lombok:1.18.22'
     implementation 'junit:junit:4.13.2'
 	implementation 'junit:junit:4.13.2'
-	implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+	implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	implementation(files('libs/flanagan.jar'))
 
 	implementation(files('libs/flanagan.jar'))
 
