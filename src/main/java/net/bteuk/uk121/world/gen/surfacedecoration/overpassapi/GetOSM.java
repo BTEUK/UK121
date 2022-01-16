@@ -260,7 +260,7 @@ public class GetOSM extends DefaultHandler
 			{
 				if (atts.getLocalName(i).equals("id"))
 				{
-					way.id = Integer.parseInt(atts.getValue(i));
+					way.id = atts.getValue(i);
 				}
 			}
 			ways.add(way);

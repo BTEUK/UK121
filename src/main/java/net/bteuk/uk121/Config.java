@@ -14,9 +14,9 @@ public class Config {
     protected File config;
 
     //Default values
-    public int yMin = -512;
+    public int yMin = -256;
     public int height = 2544;
-    public int seaLevel = 0;
+    public int seaLevel = 1;
 
     public Config() {
 

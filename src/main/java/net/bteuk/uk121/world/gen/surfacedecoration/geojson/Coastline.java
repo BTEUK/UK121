@@ -13,9 +13,9 @@ public class Coastline extends JsonAPICall
     public void getInfo()
     {
         getFile();
-        System.out.println(jsonText);
+      //  System.out.println(jsonText);
         info = gson.fromJson(jsonText, TileInfo.class);
-        System.out.println(info.type);
-        System.out.println(info.id);
+      //  System.out.println(info.type);
+      //  System.out.println(info.id);
     }
 }
