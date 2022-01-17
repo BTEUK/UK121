@@ -14,15 +14,11 @@ import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Properties;
-import java.util.function.BiFunction;
 
 public class UK121 implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -43,13 +39,6 @@ public class UK121 implements ModInitializer {
 
     private Config config;
     public static Config CONFIG;
-
-    private static final BiFunction<Long, Properties, GeneratorOptions > options = new BiFunction<Long, Properties, GeneratorOptions>() {
-        @Override
-        public GeneratorOptions apply(Long aLong, Properties properties) {
-            return null;
-        }
-    };
 
     /*
     //Adds the "Earth" generator type, used for generating the earth
@@ -76,6 +65,13 @@ public class UK121 implements ModInitializer {
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
+        //Register custom empty biome
+        Registry.register(BuiltinRegistries.BIOME, EMPTY_KEY.getValue(), EMPTY);
+        //Register Biome Source for biome and population
+        Registry.register(Registry.BIOME_SOURCE, id("earth_population_source"), EarthPopulationSource.CODEC);
+        Registry.register(Registry.BIOME_SOURCE, id("earth_biome_source"), EarthBiomeSource.CODEC);
+        Registry.register(Registry.CHUNK_GENERATOR, id("earth"), EarthGenerator.CODEC);
+
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             GeneratorType EARTH = new GeneratorType("earth") {
                 //Returns a new EarthGenerator class
@@ -93,16 +89,7 @@ public class UK121 implements ModInitializer {
                 }
             };
             GeneratorTypeAccessor.getValues().add(EARTH);
-        } else {
-            WorldTypeRegistry.registerLevelType("earth", options);
         }
-
-        //Register custom empty biome
-        Registry.register(BuiltinRegistries.BIOME, EMPTY_KEY.getValue(), EMPTY);
-        //Register Biome Source for biome and population
-        Registry.register(Registry.BIOME_SOURCE, id("earth_population_source"), EarthPopulationSource.CODEC);
-        Registry.register(Registry.BIOME_SOURCE, id("earth_biome_source"), EarthBiomeSource.CODEC);
-        Registry.register(Registry.CHUNK_GENERATOR, id("earth"), EarthGenerator.CODEC);
 
         /*
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
