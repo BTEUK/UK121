@@ -83,6 +83,7 @@ public class JsonAPICall
             //Creates the file
             FileWriter fileWriter = new FileWriter(fileName);
             boolean bCreated = false;
+
             fileWriter.write("");
 
             //Creates the link to the source
