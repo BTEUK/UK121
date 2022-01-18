@@ -1,6 +1,6 @@
 package net.bteuk.uk121.world.gen.elevation;
 
-import flanagan.interpolation.BiCubicSpline;
+import net.flanagan.interpolation.BiCubicSpline;
 import net.bteuk.uk121.UK121;
 import net.bteuk.uk121.world.gen.Projections.ModifiedAirocean;
 
