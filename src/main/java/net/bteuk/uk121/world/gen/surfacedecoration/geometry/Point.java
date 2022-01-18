@@ -127,11 +127,20 @@ public class Point
             // Check if the line segment from 'p' to
             // 'extreme' intersects with the line
             // segment from 'polygon[i]' to 'polygon[next]'
-            if (doIntersect(polygon[i], polygon[next], p, extreme))
+
+            //Directly above the point is a point of the polygon
+            //This would not actually intercept with a line so we are adding it
+            if (polygon[i].y == p.y)
+            {
+                count++;
+            }
+
+            else if (doIntersect(polygon[i], polygon[next], p, extreme))
             {
                 // If the point 'p' is collinear with line
                 // segment 'i-next', then check if it lies
                 // on segment. If it lies, return true, otherwise false
+
                 if (orientation(polygon[i], p, polygon[next]) == 0)
                 {
                     return onSegment(polygon[i], p,
