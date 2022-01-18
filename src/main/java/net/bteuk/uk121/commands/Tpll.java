@@ -53,12 +53,12 @@ public class Tpll {
 
         String[] args = coordinates.split(" ");
 
-        if (args.length == 0) {
-            usage(self);
-            return 1;
-        } else if (args.length < 2) {
-            usage(self);
-            return 1;
+        switch (args.length)
+        {
+            case 0:
+            case 1:
+                usage(self);
+                return 1;
         }
 
         double altitude = Double.NaN;
@@ -77,6 +77,7 @@ public class Tpll {
             try {
                 altitude = Double.parseDouble(args[args.length - 1]);
             } catch (Exception e) {
+                e.printStackTrace();
                 altitude = Double.NaN;
             }
         }
@@ -87,6 +88,7 @@ public class Tpll {
             try {
                 altitude = Double.parseDouble(selectArray(args, 1)[selectArray(args, 1).length - 1]);
             } catch (Exception e) {
+                e.printStackTrace();
                 altitude = Double.NaN;
             }
         }
