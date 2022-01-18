@@ -1,5 +1,7 @@
 package net.bteuk.uk121.world.gen.surfacedecoration.geometry;
 
+import org.lwjgl.system.CallbackI;
+
 // A Java program to check if a given point
 // lies inside a given polygon
 // Refer https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
@@ -116,25 +118,44 @@ public class Point
 
         // Create a point for line segment from p to infinite
         Point extreme = new Point(INF, p.y);
+        Point extremeLeft = new Point( INF, p.y - 1);
+        Point extremeRight= new Point( INF, p.y + 1);
+        Point pLeft = new Point(p.x, p.y - 1);
+        Point pRight = new Point(p.x, p.y + 1);
 
         // Count intersections of the above line
         // with sides of polygon
         int count = 0, i = 0;
         do
         {
+            int last = (i + n - 1) % n;
             int next = (i + 1) % n;
-
             // Check if the line segment from 'p' to
             // 'extreme' intersects with the line
             // segment from 'polygon[i]' to 'polygon[next]'
 
             //Directly above the point is a point of the polygon
-            //This would not actually intercept with a line so we are adding it
-            if (polygon[i].y == p.y)
+            //This would usually create an intercept with a line so we are skipping it
+
+            //If our line intercepts with a node at the other end, skip this one and deal with it on the next one
+            if (polygon[next].y == p.y)
             {
-                count++;
+                i = next;
+                continue;
             }
 
+            //If the node is in line with the point, and it is a point in the relevant direction
+            if (polygon[i].y == p.y && doIntersect(polygon[i], polygon[next], p, extreme))
+            {
+            //    System.out.println("Ya boi is inline");
+                //Check whether it is a change of state
+                if ((doIntersect(polygon[last], polygon[i], pLeft, extremeLeft) && doIntersect(polygon[i], polygon[next], pRight, extremeRight))
+                        || (doIntersect(polygon[i], polygon[next], pLeft, extremeLeft) && doIntersect(polygon[last], polygon[i], pRight, extremeRight)))
+                {
+                //    System.out.println("Ya boi changes state so increasing");
+                    count++;
+                }
+            }
             else if (doIntersect(polygon[i], polygon[next], p, extreme))
             {
                 // If the point 'p' is collinear with line
@@ -147,6 +168,8 @@ public class Point
                             polygon[next]);
                 }
 
+            //    System.out.println("Ya boi intercepts a line:");
+            //    System.out.println("(" +polygon[i].x +", "+polygon[i].y +") to (" +polygon[next].x +", "+polygon[next].y +")");
                 count++;
             }
             i = next;
@@ -159,66 +182,15 @@ public class Point
     // Driver Code
     public static void main(String[] args)
     {
-        Point polygon1[] = {new Point(0, 0),
+        Point polygon1[] = {
                 new Point(10, 0),
-                new Point(10, 10),
+                new Point(10, 30),
+                new Point(8, 20),
+                new Point(4, 25),
                 new Point(0, 10)};
         int n = polygon1.length;
-        Point p = new Point(20, 20);
+        Point p = new Point(-10, 20);
         if (isInside(polygon1, n, p))
-        {
-            System.out.println("Yes");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        p = new Point(5, 5);
-        if (isInside(polygon1, n, p))
-        {
-            System.out.println("Yes");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        Point polygon2[] = {new Point(0, 0),
-                new Point(5, 5), new Point(5, 0)};
-        p = new Point(3, 3);
-        n = polygon2.length;
-        if (isInside(polygon2, n, p))
-        {
-            System.out.println("Yes");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        p = new Point(5, 1);
-        if (isInside(polygon2, n, p))
-        {
-            System.out.println("Yes");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        p = new Point(8, 1);
-        if (isInside(polygon2, n, p))
-        {
-            System.out.println("Yes");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        Point polygon3[] = {new Point(0, 0),
-                new Point(10, 0),
-                new Point(10, 10),
-                new Point(0, 10)};
-        p = new Point(-1, 10);
-        n = polygon3.length;
-        if (isInside(polygon3, n, p))
         {
             System.out.println("Yes");
         }
