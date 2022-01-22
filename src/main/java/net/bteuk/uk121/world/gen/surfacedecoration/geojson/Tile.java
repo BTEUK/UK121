@@ -1,11 +1,10 @@
 package net.bteuk.uk121.world.gen.surfacedecoration.geojson;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 public class Tile extends JsonAPICall
 {
-    public TileInfo[] infos;
+    public ArrayList<TileInfo> infos;
 
     public Tile(int x, int z)
     {
@@ -32,20 +31,18 @@ public class Tile extends JsonAPICall
         if (downloaded == false)
         {
             System.out.println("Not downloaded");
-            infos = new TileInfo[0];
+            infos = new ArrayList<TileInfo>(0);
             return;
         }
         if (jsonNodes == null)
         {
-            infos = new TileInfo[0];
+            infos = new ArrayList<TileInfo>(0);
             return;
         }
-        infos = new TileInfo[jsonNodes.length];
-        //Make this into an arraylist to solve future problems with 1 - many nodes
 
-        int iActualCount;
+        int iNodes = jsonNodes.length;
 
-        final int iNodes = jsonNodes.length;
+        infos = new ArrayList<TileInfo>(iNodes);
 
         cal = Calendar.getInstance();
         time = cal.getTime();
@@ -72,7 +69,15 @@ public class Tile extends JsonAPICall
         for (int i = 0 ; i < iNodes ; i++)
         {
             //Deserialise the information
-            infos[i] = gson.fromJson(jsonNodes[i], TileInfo.class);
+            try
+            {
+                infos.add(gson.fromJson(jsonNodes[i], TileInfo.class));
+            }
+            catch (Exception e)
+            {
+                System.out.println(jsonNodes[i]);
+                e.printStackTrace();
+            }
         }
 
         cal = Calendar.getInstance();
@@ -85,42 +90,12 @@ public class Tile extends JsonAPICall
         time = cal.getTime();
         long lTimeToDoReferences1 = time.getTime();
 
+        iNodes = infos.size();
+
         //Deal with all references
         for (int i = 0 ; i < iNodes ; i++)
         {
-            if (infos[i].type !=null)
-            {
-                //If the type is a reference, refer to the reference
-                if (infos[i].type.equals("Reference"))
-                { //Can be ways, coastline or relation
-                    //For way references
-                    if (infos[i].location.startsWith("way"))
-                    {
-                        JsonAPICall newCall = new JsonAPICall(infos[i].location);
-                        cal = Calendar.getInstance();
-                        time = cal.getTime();
-                        long lTimeToGetReference1 = time.getTime();
-
-                        newCall.getFile();
-
-                        cal = Calendar.getInstance();
-                        time = cal.getTime();
-                        long lTimeToGetReference2 = time.getTime();
-
-                    //    System.out.println("1.1.1."+iTile +".3.1 Time to get the Json text of reference: "+(lTimeToGetReference2-lTimeToGetReference1)+" ms");
-
-                        jsonNodes[i] = newCall.jsonText;
-                        santise(i);
-                        infos[i] = gson.fromJson(jsonNodes[i], TileInfo.class);
-                    }
-                    //  Coastline coastline = new Coastline(infos[i].location);
-                    //  coastline.getInfo();
-                }
-            }
-            else
-            {
-                infos[i].type = "N/A";
-            }
+            dealWithReference(i);
         }
         cal = Calendar.getInstance();
         time = cal.getTime();
@@ -145,21 +120,31 @@ public class Tile extends JsonAPICall
             int sfnjl = jsonNodes[i].indexOf("[");
             if (jsonNodes[i].charAt(sfnjl+1) == '[')
             {
-                //3d array - do nothing
+                //3d array
                 if (jsonNodes[i].charAt(sfnjl+2) == '[')
                 {
+                    //Already a 4d array - do nothing
+                    if (jsonNodes[i].charAt(sfnjl+3) == '[')
+                    {
+
+                    }
+                    else
+                    {
+                        jsonNodes[i] = jsonNodes[i].replace("[[[", "[[[[");
+                        jsonNodes[i] = jsonNodes[i].replace("]]]", "]]]]");
+                    }
                 }
                 else
                 {
-                    jsonNodes[i] = jsonNodes[i].replace("[[", "[[[");
-                    jsonNodes[i] = jsonNodes[i].replace("]]", "]]]");
+                    jsonNodes[i] = jsonNodes[i].replace("[[", "[[[[");
+                    jsonNodes[i] = jsonNodes[i].replace("]]", "]]]]");
                 }
             }
             //1d array
             else
             {
-                jsonNodes[i] = jsonNodes[i].replace("[", "[[[");
-                jsonNodes[i] = jsonNodes[i].replace("]", "]]]");
+                jsonNodes[i] = jsonNodes[i].replace("[", "[[[[");
+                jsonNodes[i] = jsonNodes[i].replace("]", "]]]]");
             }
         }
 
@@ -190,5 +175,126 @@ public class Tile extends JsonAPICall
     //    long lTimeToSanatise2 = time.getTime();
 
       //  System.out.println("1.1.1."+ +".2 Time sanatise all lines and deserialise: "+(lTimeToDeseiralise2-lTimeToDesrialise1)+" ms");
+    }
+
+    private String santise(String string)
+    {
+        //Changes the coordinates
+        if (string.contains("coordinates"))
+        {
+            int sfnjl = string.indexOf("[");
+            if (string.charAt(sfnjl+1) == '[')
+            {
+                //3d array
+                if (string.charAt(sfnjl+2) == '[')
+                {
+                    //Already a 4d array - do nothing
+                    if (string.charAt(sfnjl+3) == '[')
+                    {
+
+                    }
+                    else
+                    {
+                        string = string.replace("[[[", "[[[[");
+                        string = string.replace("]]]", "]]]]");
+                    }
+                }
+                else
+                {
+                    string = string.replace("[[", "[[[[");
+                    string = string.replace("]]", "]]]]");
+                }
+            }
+            //1d array
+            else
+            {
+                string = string.replace("[", "[[[[");
+                string = string.replace("]", "]]]]");
+            }
+        }
+
+        //Changes the properties
+        if (string.contains("properties\":{"))
+        {
+            String original;
+
+            int sfnjl = string.indexOf("properties");
+            String after = string.substring(sfnjl);
+            int iEnd = after.indexOf('}');
+            String section = after.substring(12, iEnd+1);
+
+            section = section.replace("{", "[[");
+            section = section.replace("}", "]]");
+            section = section.replace("\",\"", "],[");
+            section = section.replace(':', ',');
+
+            StringBuilder sb = new StringBuilder("");
+            sb.append(string, 0, sfnjl+12);
+            sb.append(section);
+            sb.append(string.substring(sfnjl+iEnd+1));
+
+            string = sb.toString();
+        }
+        return string;
+    }
+
+    public void dealWithReference(int i)
+    {
+        String type;
+        String location;
+        int j;
+
+        TileInfo info = infos.get(i);
+        type = info.type;
+        if (type !=null)
+        {
+            //If the type is a reference, refer to the reference
+            if (type.equals("Reference"))
+            { //Can be ways, coastline or relation
+                location = info.location;
+                //For way references
+                if (location.startsWith("way"))
+                {
+                    JsonAPICall newCall = new JsonAPICall(location);
+
+                    newCall.getFile();
+
+                    jsonNodes[i] = newCall.jsonText;
+                    santise(i);
+                    infos.remove(i);
+                    infos.add(gson.fromJson(jsonNodes[i], TileInfo.class));
+
+                    dealWithReference(infos.size());
+                }
+                else if (location.startsWith("coastline"))
+                {
+                    JsonAPICall newCall = new JsonAPICall(location);
+
+                    newCall.getFile();
+
+                    jsonNodes[i] = newCall.jsonText;
+                    String[] newJsonNodes = jsonNodes[i].split("\n");
+                    int iLength = newJsonNodes.length;
+
+                    infos.remove(i);
+
+                    int iSize = infos.size();
+
+                    for (j = 0 ; j < iLength ; j++)
+                    {
+                        newJsonNodes[j] = santise(newJsonNodes[j]);
+                        infos.add(gson.fromJson(newJsonNodes[j], TileInfo.class));
+                        dealWithReference(iSize);
+                        iSize++;
+                    }
+                }
+                //  Coastline coastline = new Coastline(infos[i].location);
+                //  coastline.getInfo();
+            }
+        }
+        else
+        {
+            info.type = "N/A";
+        }
     }
 }
