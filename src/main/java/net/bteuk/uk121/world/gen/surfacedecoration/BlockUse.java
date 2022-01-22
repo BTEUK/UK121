@@ -10,6 +10,7 @@ import net.bteuk.uk121.world.gen.surfacedecoration.geojson.TileGrid;
 import net.bteuk.uk121.world.gen.surfacedecoration.geometry.Point;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.*;
 import net.bteuk.uk121.world.gen.surfacedecoration.overpassapi.Object;
+import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -151,6 +152,7 @@ public class BlockUse
                             case "cycleway":
                             case "bridleway":
                             case "path":
+                            case "steps":
                                 useType = UseType.Footway;
                                 break;
                             case "tertiary":
@@ -166,6 +168,15 @@ public class BlockUse
 
                     case "water":
                         useType = UseType.Water;
+                    case "natural":
+                        if (tag.value == "coastline")
+                        {
+                            useType = UseType.Water;
+                        }
+                        break;
+
+                    case "railway":
+                        useType = UseType.Railway;
                         break;
                 }
 
@@ -174,7 +185,7 @@ public class BlockUse
             }
 
             //Deal with building, highway or water polygon
-            if (bHighway || useType == UseType.BuildingOutline || useType == UseType.Water)
+            if (bHighway || useType == UseType.BuildingOutline || useType == UseType.Water || useType == UseType.Railway)
             {
                 final int iNodes = nodes.size();
                 //Stores the block coordinates of each of the nodes
@@ -459,6 +470,31 @@ public class BlockUse
                                     }
                                 }
                             }
+                        }
+                        break;
+                    case Railway:
+                        //Get direction of railway in degrees
+                        int iDirection = 39;
+
+                        if (i > 33 || i < 15 || j > 33 || j < 15)
+                        {
+                            break;
+                        }
+
+                        if (iDirection <= 90 || iDirection > 270)
+                        {
+                            grid[i+1][j] = UseType.xAlignedRail;
+                            grid[i-1][j] = UseType.xAlignedRail;
+                        }
+                        else
+                        {
+                            grid[i][j+1] = UseType.yAlignedRail;
+                            grid[i][j-1] = UseType.yAlignedRail;
+                        }
+
+                        if ((i+j)%2 == 0)
+                        {
+                            grid[i][j] = UseType.railwaySleeper;
                         }
                         break;
                 }
