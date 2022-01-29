@@ -7,7 +7,7 @@ The aim of this project is to update BTE UK to version 1.17.1 of Minecraft, this
 without relying on the height extending mod [CubicChunks](https://github.com/OpenCubicChunks/CubicChunks).
 This is possible by extending the Minecraft build limit above the default values.   
 
-**This mod is under development with no planned release data!**
+**This mod is under development with no planned release date!**
 
 ## Features
 - Generate real world terrain using a modified dymaxion projection
@@ -19,7 +19,7 @@ This is possible by extending the Minecraft build limit above the default values
 - Real world weather (future)
 
 ## Commands and Permissions
-/tpll latitude longitude (altitude) - uk121.tpll
+/tpll latitude longitude [altitude] - uk121.tpll
 
 ## Prerequisites
 - Required: [Fabric](https://fabricmc.net/use/installer/)
