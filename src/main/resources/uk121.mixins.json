@@ -1,8 +1,8 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.bteuk.uk121.mixin",
-  "compatibilityLevel": "JAVA_16",
+  "package": "net.bteuk.uk121.mod.mixin",
+  "compatibilityLevel": "JAVA_18",
   "mixins": [
     "GeneratorTypeAccessor",
     "IncreaseWorldHeight",

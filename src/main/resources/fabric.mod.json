@@ -20,10 +20,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.bteuk.uk121.UK121"
+      "net.bteuk.uk121.mod.UK121"
     ],
     "preLaunch": [
-      "net.bteuk.uk121.PreLaunch"
+      "net.bteuk.uk121.mod.PreLaunch"
     ]
   },
   "mixins": [
