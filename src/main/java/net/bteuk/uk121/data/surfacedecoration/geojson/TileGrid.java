@@ -8,6 +8,7 @@ import net.bteuk.uk121.data.surfacedecoration.overpassapi.Way;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class TileGrid
 {
@@ -108,30 +109,40 @@ public class TileGrid
                     //Stores the reference
                   //  long ref = sanatise(tileGrid[iCount].infos[iInfos].id);
 
+
                     //Road, path, building
-                    if (tileGrid[iCount].infos.get(iInfos).geometry.type.equals("LineString") || tileGrid[iCount].infos.get(iInfos).geometry.type.equals("Polygon"))
+                    String geometryType = tileGrid[iCount].infos.get(iInfos).geometry.type;
+                    boolean bLineString = geometryType.equals("LineString");
+                    boolean bPolygon = false;
+
+                    if (!bLineString)
+                        bPolygon = geometryType.equals("Polygon");
+
+                    if (bLineString || bPolygon)
                     {
                         //Creates way
                         way = new Way();
                         way.setId(tileGrid[iCount].infos.get(iInfos).id);
 
+                        double[][] coords;
+                        coords = bLineString ? tileGrid[iCount].infos.get(iInfos).geometry.lineStringCoordinates :
+                                tileGrid[iCount].infos.get(iInfos).geometry.polygonCoordinates.getFirst();
+
                         //Adds nodes to way
-                        for (int i = 0; i < tileGrid[iCount].infos.get(iInfos).geometry.coordinates[0].length; i++)
+                        for (int i = 0; i < coords.length; i++)
                         {
                             //All in form lat, long
-                            node = new Node(0, tileGrid[iCount].infos.get(iInfos).geometry.coordinates[0][i][1], tileGrid[iCount].infos.get(iInfos).geometry.coordinates[0][i][0]);
+                            node = new Node(0, coords[i][1], coords[i][0]);
                             way.getNodes().add(node);
                         }
 
                         if (tileGrid[iCount].infos.get(iInfos).properties == null)
-                            tileGrid[iCount].infos.get(iInfos).properties = new String[0][0];
-
-                        int iProperties = tileGrid[iCount].infos.get(iInfos).properties.length;
+                            tileGrid[iCount].infos.get(iInfos).properties = new HashMap<>(0);
 
                         //Adds the tags to the way
-                        for (int i = 0; i < iProperties ; i++)
+                        for (HashMap.Entry<String, String> property : tileGrid[iCount].infos.get(iInfos).properties.entrySet())
                         {
-                            tag = new Tag(tileGrid[iCount].infos.get(iInfos).properties[i][0], tileGrid[iCount].infos.get(iInfos).properties[i][1]);
+                            tag = new Tag(property.getKey(), property.getValue());
                             way.getTags().add(tag);
                         }
                         ways.add(way);

@@ -20,7 +20,11 @@ public class Tile extends JsonAPICall
         time = cal.getTime();
         long lTimeToGetText1 = time.getTime();
 
-        boolean downloaded = getFile();
+        boolean fetched = fetchData();
+        if (!fetched)
+        {
+            System.out.println("Unable to fetch data for this tile");
+        }
 
         cal = Calendar.getInstance();
         time = cal.getTime();
@@ -28,9 +32,9 @@ public class Tile extends JsonAPICall
 
         System.out.println("1.1.1."+iTile +".1 Time to get the Json text and split it: "+(lTimeToGetText2-lTimeToGetText1)+" ms");
 
-        if (downloaded == false)
+        if (!fetched)
         {
-            System.out.println("Not downloaded");
+            System.out.println("Data failed to fetch");
             infos = new ArrayList<TileInfo>(0);
             return;
         }
@@ -52,7 +56,7 @@ public class Tile extends JsonAPICall
         for (int i = 0 ; i < iNodes ; i++)
         {
             //Sanitise the text
-            santise(i);
+//            santise(i);
         }
 
         cal = Calendar.getInstance();
@@ -77,6 +81,7 @@ public class Tile extends JsonAPICall
             {
                 System.out.println(jsonNodes[i]);
                 e.printStackTrace();
+                return;
             }
         }
 
@@ -245,6 +250,12 @@ public class Tile extends JsonAPICall
         int j;
 
         TileInfo info = infos.get(i);
+        if (info == null)
+        {
+
+            return;
+        }
+
         type = info.type;
         if (type !=null)
         {
@@ -257,20 +268,25 @@ public class Tile extends JsonAPICall
                 {
                     JsonAPICall newCall = new JsonAPICall(location);
 
-                    newCall.getFile();
-
+                    if (!newCall.fetchData())
+                    {
+                        System.out.println("Problem dealing with way reference");
+                    }
                     jsonNodes[i] = newCall.jsonText;
-                    santise(i);
+//                    santise(i);
                     infos.remove(i);
                     infos.add(gson.fromJson(jsonNodes[i], TileInfo.class));
 
-                    dealWithReference(infos.size());
+                    dealWithReference(infos.size() - 1);
                 }
                 else if (location.startsWith("coastline"))
                 {
                     JsonAPICall newCall = new JsonAPICall(location);
 
-                    newCall.getFile();
+                    if (!newCall.fetchData())
+                    {
+                        System.out.println("Problem dealing with coastline reference");
+                    }
 
                     jsonNodes[i] = newCall.jsonText;
                     String[] newJsonNodes = jsonNodes[i].split("\n");
@@ -282,7 +298,7 @@ public class Tile extends JsonAPICall
 
                     for (j = 0 ; j < iLength ; j++)
                     {
-                        newJsonNodes[j] = santise(newJsonNodes[j]);
+//                        newJsonNodes[j] = santise(newJsonNodes[j]);
                         infos.add(gson.fromJson(newJsonNodes[j], TileInfo.class));
                         dealWithReference(iSize);
                         iSize++;

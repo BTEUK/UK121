@@ -12,7 +12,7 @@ public class Coastline extends JsonAPICall
 
     public void getInfo()
     {
-        getFile();
+        fetchData();
       //  System.out.println(jsonText);
         info = gson.fromJson(jsonText, TileInfo.class);
       //  System.out.println(info.type);

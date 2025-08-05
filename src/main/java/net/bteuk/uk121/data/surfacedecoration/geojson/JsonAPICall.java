@@ -1,4 +1,5 @@
 package net.bteuk.uk121.data.surfacedecoration.geojson;
+
 import com.google.gson.*;
 import net.bteuk.uk121.mod.UK121;
 
@@ -14,11 +15,14 @@ public class JsonAPICall
     String jsonText;
     String[] jsonNodes;
 
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+        .registerTypeAdapter(Geometry.class, new GeometryDeserializer())
+        .create();
+
     int x, z;
     protected String szURL;
 
-    public static String directory = UK121.directory + "Ways/";
+    public static final String directory = UK121.directory + "Ways/";
     public static String fileName;
 
     public static void main(String[] args)
@@ -49,41 +53,47 @@ public class JsonAPICall
         this.szURL = sb.toString();
     }
 
-    protected boolean getFile()
+    protected boolean fetchData()
     {
-        File newDirectory = new File(fileName);
+        File newFile = new File(fileName);
 
-        if (!newDirectory.exists())
+        if (!newFile.exists())
         {
-            System.out.println("Downloading tile");
-            downloadFile();
+            //Attempt to download file
+            if (!downloadFile())
+                return false;
         }
+
         //Already stored in cache
         try
         {
-           // InputStream is = newDirectory.toURI().toURL().openStream();
-           // getData(is);
-            return (readDataFromFile(newDirectory));
+            // InputStream is = newDirectory.toURI().toURL().openStream();
+            // getData(is);
+            return (readDataFromFile(newFile));
         }
         catch (Exception e)
         {
-            String JsonText = "";
-            jsonNodes = jsonText.split("\n");
+            System.out.println("Unable to read data from file");
+            jsonNodes = new String[0];
         }
         return true;
     }
 
-    private void downloadFile()
+    /**
+     * Downloads the relevant file for this call
+     * @return
+     */
+    private boolean downloadFile()
     {
-        File newDirectory;
-        String dirName = "";
         InputStream in = null;
         try
         {
+            //Creates the directories
+            File directory = new File(JsonAPICall.directory);
+            directory.mkdirs();
+
             //Creates the file
             FileWriter fileWriter = new FileWriter(fileName);
-            boolean bCreated = false;
-
             fileWriter.write("");
 
             //Creates the link to the source
@@ -97,6 +107,10 @@ public class JsonAPICall
             writeChannel
                     .transferFrom(readChannel, 0, Long.MAX_VALUE);
 
+            //Research was done to suggest this was the fastest method to read the data
+            //Alternatively I guess we could get the data and do file creation asynchronously. Could be slightly quicker.
+
+            return true;
         }
         catch (Exception e)
         {
@@ -105,6 +119,7 @@ public class JsonAPICall
                 //   in.close();
             }
             e.printStackTrace();
+            return false;
         }
     }
 

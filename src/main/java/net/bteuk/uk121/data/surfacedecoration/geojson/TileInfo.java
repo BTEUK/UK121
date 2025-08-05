@@ -1,5 +1,7 @@
 package net.bteuk.uk121.data.surfacedecoration.geojson;
 
+import java.util.HashMap;
+
 public class TileInfo
 {
     public String jsonText;
@@ -7,7 +9,7 @@ public class TileInfo
     public String type;
     public String location;
     public Geometry geometry;
-    public String[][] properties;
+    public HashMap<String, String> properties;
     public String id;
 
     public TileInfo(String json)
