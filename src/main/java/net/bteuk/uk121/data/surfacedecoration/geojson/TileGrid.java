@@ -16,7 +16,7 @@ public class TileGrid
 
     public static void main(String[] args)
     {
-      //  TileGrid grid = new TileGrid(51.438209316908136, 0.38381567219754);
+//        TileGrid grid = new TileGrid(51.438209316908136, 0.38381567219754);
     }
 
     public TileGrid(BoundingBox bbox)
@@ -125,8 +125,12 @@ public class TileGrid
                         way.setId(tileGrid[iCount].infos.get(iInfos).id);
 
                         double[][] coords;
-                        coords = bLineString ? tileGrid[iCount].infos.get(iInfos).geometry.lineStringCoordinates :
-                                tileGrid[iCount].infos.get(iInfos).geometry.polygonCoordinates.getFirst();
+                        if (bLineString)
+                            coords = tileGrid[iCount].infos.get(iInfos).geometry.lineStringCoordinates;
+                        else if (tileGrid[iCount].infos.get(iInfos).geometry.polygonCoordinates != null)
+                            coords = tileGrid[iCount].infos.get(iInfos).geometry.polygonCoordinates.getFirst();
+                        else
+                            coords = new double[0][0];
 
                         //Adds nodes to way
                         for (int i = 0; i < coords.length; i++)

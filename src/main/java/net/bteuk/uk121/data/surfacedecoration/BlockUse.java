@@ -11,10 +11,14 @@ import net.bteuk.uk121.data.surfacedecoration.overpassapi.Node;
 import net.bteuk.uk121.data.surfacedecoration.overpassapi.Object;
 import net.bteuk.uk121.data.surfacedecoration.overpassapi.Tag;
 import net.bteuk.uk121.data.surfacedecoration.overpassapi.Way;
+import net.minecraft.util.math.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Identifies what each block in a 16x16 chunk represents
@@ -46,10 +50,43 @@ public class BlockUse
 
     public static void main(String[] args)
     {
-        BoundingBox bbox = new BoundingBox(51.43757, 51.43829, 0.38353, 0.38454);
-        int[] blockMins = {0, 0};
-        BlockUse BU = new BlockUse(bbox , blockMins, TerraConstants.projection);
+        ModifiedAirocean projection = new ModifiedAirocean();
 
+        ChunkPos chunkPos = new ChunkPos(173696, -338396);
+
+        int x0 = chunkPos.getStartX();
+        int z0 = chunkPos.getStartZ();
+        int x1 = chunkPos.getEndX();
+        int z1 = chunkPos.getEndZ();
+
+        int X0 = x0;
+        int X1 = x1;
+        int Z0 = z0;
+        int Z1 = z1;
+
+        double[] corner1 = projection.toGeo(X0, Z0);
+        double[] corner2 = projection.toGeo(X1, Z1);
+
+        //xMin, zMin, zMax, zMax
+        double[] geoCords = {min(corner1[1], corner2[1]), min(corner1[0], corner2[0]), max(corner1[1], corner2[1]), max(corner1[0], corner2[0])};
+
+        //Multiply the bbox by 3 on both sides
+        double xRange = geoCords[2] - geoCords[0];
+        geoCords[0] = geoCords[0] - Math.abs(xRange);
+        geoCords[2] = geoCords[2] + Math.abs(xRange);
+
+        double zRange = geoCords[3] - geoCords[1];
+        geoCords[1] = geoCords[1] - Math.abs(zRange);
+        geoCords[3] = geoCords[3] + Math.abs(zRange);
+
+        //Creates bounding box for use by the osm fetcher
+        BoundingBox bb = new BoundingBox(geoCords);
+        BlockUse BU = new BlockUse(bb, new int[]{X0 - 16, Z0 - 16}, projection);
+
+//        BoundingBox bbox = new BoundingBox(51.43757, 51.43829, 0.38353, 0.38454);
+//        int[] blockMins = {0, 0};
+//        BlockUse BU = new BlockUse(bbox , blockMins, TerraConstants.projection);
+//
         BU.fillGrid(false);
 
      //   BU.display();
@@ -195,7 +232,7 @@ public class BlockUse
                 int[][] iNodeBlocks = new int[iNodes][2];
                 int iCount = 0;
 
-                Point[] Polygon = new Point[iNodes-1];
+                Point[] Polygon = new Point[iNodes];
 
                 //Goes through each node and adds it to the node blocks array
                 for (Node node : nodes)
